@@ -1,0 +1,8 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+skills/tool-index.md
+skills/tool-index.json
+work/
+dist/

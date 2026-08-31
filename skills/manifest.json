@@ -1,0 +1,24 @@
+{
+  "name": "mobile-reverse-skill",
+  "version": "0.1.0",
+  "description": "Portable Android/iOS reverse-engineering skills for Codex and Claude Code.",
+  "modules": [
+    "mobile-reverse-router",
+    "mobile-reverse",
+    "apk-reverse",
+    "macos-reverse",
+    "reverse-engineering",
+    "ghidra-reverse",
+    "ida-reverse",
+    "radare2",
+    "binary-diff",
+    "case-review",
+    "docs-generator",
+    "diagram-generator"
+  ],
+  "clients": ["codex", "claude"],
+  "upstream": {
+    "repository": "https://github.com/zhaoxuya520/reverse-skill",
+    "commit": "71acc8e3115f76bad7a914c36466c1086232288c"
+  }
+}

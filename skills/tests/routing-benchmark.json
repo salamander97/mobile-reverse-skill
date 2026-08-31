@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {"hint": "decode an APK with JADX and apktool", "expect": "R1"},
+    {"hint": "inspect an Android AAB and DEX", "expect": "R1"},
+    {"hint": "Frida hook on an authorized iOS IPA", "expect": "R2"},
+    {"hint": "Swift Objective-C iOS framework", "expect": "R2"},
+    {"hint": "analyze a macOS Mach-O dylib", "expect": "R3"},
+    {"hint": "codesign and otool an app bundle", "expect": "R3"},
+    {"hint": "Ghidra headless decompile", "expect": "R4"},
+    {"hint": "IDA Pro inspect a binary", "expect": "R5"},
+    {"hint": "radare2 rabin2 reconnaissance", "expect": "R6"},
+    {"hint": "rizin compare two ELF files", "expect": "R6"},
+    {"hint": "BinDiff function matching across versions", "expect": "R7"},
+    {"hint": "ARM64 JNI native ELF analysis", "expect": "R8"},
+    {"hint": "review case evidence hashes", "expect": "R9"},
+    {"hint": "write a security report", "expect": "R10"},
+    {"hint": "draw a Mermaid data flow diagram", "expect": "R11"},
+    {"hint": "general authorized native reverse engineering", "expect": "R8"}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "meta": {
+    "description": "Mobile reverse skill routing source of truth",
+    "fallbackId": "R8",
+    "scoring": "Matching rules add score; priority breaks ties."
+  },
+  "priority": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"],
+  "routes": {
+    "R1": {"label": "Android package reverse", "skill": "apk-reverse/SKILL.md", "keywords": [{"must": "\\bapk\\b|\\baab\\b|\\bdex\\b|jadx|apktool|smali|\\bandroid\\b|bundletool"}]},
+    "R2": {"label": "Android/iOS mobile runtime", "skill": "mobile-reverse/SKILL.md", "keywords": [{"must": "\\bipa\\b|\\bios\\b|swift|objective.?c|frida|objection|ssl.?pin|root.?detect|jailbreak|mobile"}]},
+    "R3": {"label": "Mach-O and macOS", "skill": "macos-reverse/SKILL.md", "keywords": [{"must": "mach.?o|macos|\\bapp bundle\\b|dylib|framework|codesign|launchdaemon"}]},
+    "R4": {"label": "Ghidra", "skill": "ghidra-reverse/SKILL.md", "keywords": [{"must": "ghidra|analyzeheadless|headless decompil"}]},
+    "R5": {"label": "IDA Pro", "skill": "ida-reverse/SKILL.md", "keywords": [{"must": "\\bida\\b|ida pro|idalib|idc|idapython"}]},
+    "R6": {"label": "radare2/rizin", "skill": "radare2/SKILL.md", "keywords": [{"must": "radare2|\\br2\\b|rabin2|radiff2|rizin|rz-bin"}]},
+    "R7": {"label": "Binary diff", "skill": "binary-diff/SKILL.md", "keywords": [{"must": "bindiff|bin diff|binary diff|symbol migration|function matching|cross.?version"}]},
+    "R8": {"label": "Native reverse engineering", "skill": "reverse-engineering/SKILL.md", "keywords": [{"must": "\\belf\\b|\\barm64?e?\\b|\\barm\\b|jni|native library|stripped binary|reverse engineer"}]},
+    "R9": {"label": "Case and evidence review", "skill": "case-review/SKILL.md", "keywords": [{"must": "case review|evidence|fixity|traceability|hash review"}]},
+    "R10": {"label": "Report generation", "skill": "docs-generator/SKILL.md", "keywords": [{"must": "report|writeup|finding handoff|security report"}]},
+    "R11": {"label": "Diagram generation", "skill": "diagram-generator/SKILL.md", "keywords": [{"must": "mermaid|graphviz|plantuml|diagram|data flow"}]}
+  }
+}

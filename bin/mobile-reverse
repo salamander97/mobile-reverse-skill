@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+case "${1:-route}" in
+  route) shift; exec bash "$ROOT/skills/scripts/master-route.sh" --hint "${*:-mobile reverse engineering}" ;;
+  case-init) shift; exec bash "$ROOT/skills/scripts/case-init.sh" "$@" ;;
+  tools) exec bash "$ROOT/skills/scripts/refresh-tool-index.sh" ;;
+  check) exec bash "$ROOT/setup.sh" check ;;
+  *) echo "Usage: mobile-reverse [route TEXT|case-init OPTIONS|tools|check]" >&2; exit 2 ;;
+esac

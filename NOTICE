@@ -1,0 +1,17 @@
+# Attribution and provenance
+
+`mobile-reverse-skill` contains selected and adapted material from
+[`zhaoxuya520/reverse-skill`](https://github.com/zhaoxuya520/reverse-skill),
+resolved at commit `71acc8e3115f76bad7a914c36466c1086232288c` on 2026-08-31.
+The upstream project is MIT licensed. Its complete license text is preserved
+at `THIRD_PARTY_NOTICES/reverse-skill-LICENSE.txt`.
+
+The selected upstream-derived areas are the specialist skill playbooks,
+references, case-review/reporting templates, and compatible helper scripts
+under `skills/`. They have been narrowed, re-routed, or edited for this
+mobile-focused distribution. The new installer, documentation, routing
+configuration, and integration glue are maintained in this repository.
+
+Third-party tools named in the documentation remain separate projects with
+their own licenses. This repository does not bundle commercial IDA Pro, JEB,
+Hopper, Frida Gadget payloads, Ghidra plugins, or MCP credentials.
