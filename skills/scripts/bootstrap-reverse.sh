@@ -253,8 +253,22 @@ ensure_python_runtime() {
   if has_cmd pipx; then
     current_version=$(pipx --version 2>/dev/null | head -n1 | tr -d '[:space:]')
   fi
-  if [[ "$current_version" != "$pipx_version" ]]; then
-    python3 -m pip install --user --upgrade "$pipx_package" || return 1
+  if [[ -z "$current_version" ]]; then
+    # Prefer a package-manager install first: modern Python (PEP 668,
+    # "externally-managed-environment") refuses a bare `pip install` on
+    # Homebrew/apt Python, so try that route before falling back to pip.
+    if [[ "$PLATFORM" == "macos" ]] && has_cmd brew; then
+      install_brew pipx || true
+    elif [[ "$PLATFORM" == "linux" ]]; then
+      install_apt pipx || true
+    fi
+    if ! has_cmd pipx; then
+      python3 -m pip install --user --upgrade "$pipx_package" \
+        || python3 -m pip install --user --upgrade --break-system-packages "$pipx_package" \
+        || return 1
+    fi
+  elif [[ "$current_version" != "$pipx_version" ]]; then
+    log_warn "pipx $current_version is installed (manifest pins $pipx_version); keeping the installed version instead of forcing a pip upgrade that PEP 668 would block."
   fi
   python3 -m pipx ensurepath >/dev/null 2>&1 || true
   export PATH="$HOME/.local/bin:$PATH"

@@ -31,13 +31,16 @@ esac
 
 ASSUME_YES=false
 CHECK_ONLY=false
+SCOPE="all"
 for arg in "$@"; do
   case "$arg" in
     --yes|-y) ASSUME_YES=true ;;
     --check-only) CHECK_ONLY=true ;;
+    --scope=ipa|--scope=android|--scope=all) SCOPE="${arg#--scope=}" ;;
+    --scope=*) echo "Invalid --scope: ${arg#--scope=} (use ipa, android, or all)" >&2; exit 2 ;;
     --help|-h)
       cat <<EOF
-Usage: $0 [--yes] [--check-only]
+Usage: $0 [--yes] [--check-only] [--scope=ipa|android|all]
 
 Checks the tools needed for authorized APK/IPA reverse engineering, offers
 to install anything missing (via bootstrap-reverse.sh or Homebrew), then
@@ -45,6 +48,7 @@ prints a final ready/missing/manual report.
 
   --yes         auto-confirm every install prompt (no TTY interaction)
   --check-only  detect and report only; never installs anything
+  --scope=      ipa | android | all (default: all)
 EOF
       exit 0 ;;
     *) echo "Unknown option: $arg" >&2; exit 2 ;;
@@ -85,25 +89,30 @@ platform_applicable() {
   [[ "$list" == "all" || ",$list," == *",$PLATFORM,"* ]]
 }
 
-# Parallel arrays (bash 3.2 has no associative arrays):
-#   name | check-fn-name | how (bootstrap:<cap> | brew:<formula> | manual:<note>) | platforms
-TOOLS_NAME=(); TOOLS_CHECK=(); TOOLS_HOW=(); TOOLS_PLATFORMS=()
-add_tool() { TOOLS_NAME+=("$1"); TOOLS_CHECK+=("$2"); TOOLS_HOW+=("$3"); TOOLS_PLATFORMS+=("$4"); }
+scope_applicable() {
+  local category="$1"
+  [[ "$SCOPE" == "all" || "$category" == "common" || "$category" == "$SCOPE" ]]
+}
 
-add_tool "JDK (java)"        "java_ready"           "brew:openjdk"                                            "macos"
-add_tool "JDK (java)"        "java_ready"           "manual:sudo apt-get install -y default-jdk"              "linux"
-add_tool "jadx"               "jadx"                 "bootstrap:jadx"                                          "all"
-add_tool "apktool"            "apktool"              "bootstrap:apktool"                                       "all"
-add_tool "frida/frida-ps"     "frida-ps"             "bootstrap:frida-ps"                                      "all"
-add_tool "adb"                "adb"                  "bootstrap:adb"                                           "all"
-add_tool "r2/rabin2"          "r2"                   "bootstrap:r2"                                            "all"
-add_tool "class-dump"         "class-dump"           "brew:class-dump"                                         "macos"
-add_tool "swift-demangle"     "swift_demangle_ready" "manual:xcode-select --install (Xcode Command Line Tools)" "macos"
-add_tool "graphviz (dot)"     "dot"                  "brew:graphviz"                                           "all"
-add_tool "plantuml"           "plantuml"             "brew:plantuml"                                           "all"
-add_tool "zipalign/apksigner" "zipalign"             "manual:Android SDK build-tools via sdkmanager"           "all"
-add_tool "jtool2"             "jtool2"               "manual:paid — https://www.newosxbook.com/tools/jtool.html" "macos"
-add_tool "IDA Pro"            "ida"                  "manual:licensed — install from your Hex-Rays account"   "all"
+# Parallel arrays (bash 3.2 has no associative arrays):
+#   name | check-fn-name | how (bootstrap:<cap> | brew:<formula> | manual:<note>) | platforms | category (ipa|android|common)
+TOOLS_NAME=(); TOOLS_CHECK=(); TOOLS_HOW=(); TOOLS_PLATFORMS=(); TOOLS_CATEGORY=()
+add_tool() { TOOLS_NAME+=("$1"); TOOLS_CHECK+=("$2"); TOOLS_HOW+=("$3"); TOOLS_PLATFORMS+=("$4"); TOOLS_CATEGORY+=("$5"); }
+
+add_tool "JDK (java)"        "java_ready"           "brew:openjdk"                                            "macos" "android"
+add_tool "JDK (java)"        "java_ready"           "manual:sudo apt-get install -y default-jdk"              "linux" "android"
+add_tool "jadx"               "jadx"                 "bootstrap:jadx"                                          "all"   "android"
+add_tool "apktool"            "apktool"              "bootstrap:apktool"                                       "all"   "android"
+add_tool "frida/frida-ps"     "frida-ps"             "bootstrap:frida-ps"                                      "all"   "common"
+add_tool "adb"                "adb"                  "bootstrap:adb"                                           "all"   "android"
+add_tool "r2/rabin2"          "r2"                   "bootstrap:r2"                                            "all"   "common"
+add_tool "class-dump"         "class-dump"           "manual:sudo port install class-dump (MacPorts; upstream has no prebuilt binary — build from https://github.com/nygard/class-dump with Xcode if you refuse MacPorts)" "macos" "ipa"
+add_tool "swift-demangle"     "swift_demangle_ready" "manual:xcode-select --install (Xcode Command Line Tools)" "macos" "ipa"
+add_tool "graphviz (dot)"     "dot"                  "brew:graphviz"                                           "all"   "common"
+add_tool "plantuml"           "plantuml"             "brew:plantuml"                                           "all"   "common"
+add_tool "zipalign/apksigner" "zipalign"             "manual:Android SDK build-tools via sdkmanager"           "all"   "android"
+add_tool "jtool2"             "jtool2"               "manual:paid — https://www.newosxbook.com/tools/jtool.html" "macos" "ipa"
+add_tool "IDA Pro"            "ida"                  "manual:licensed — install from your Hex-Rays account"   "all"   "common"
 
 is_ready() {
   local check="$1"
@@ -121,7 +130,9 @@ for i in "${!TOOLS_NAME[@]}"; do
   check="${TOOLS_CHECK[$i]}"
   how="${TOOLS_HOW[$i]}"
   plats="${TOOLS_PLATFORMS[$i]}"
+  category="${TOOLS_CATEGORY[$i]}"
   platform_applicable "$plats" || continue
+  scope_applicable "$category" || continue
 
   if is_ready "$check"; then
     cmd_path=$(command -v "$check" 2>/dev/null || true)
