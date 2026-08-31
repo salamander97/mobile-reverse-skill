@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# ensure-tools.sh — interactive check/install/verify wrapper, scoped to the
-# APK/IPA reverse-engineering tool set (mobile-reverse-router, apk-reverse,
+# ensure-tools.sh — trình bao kiểm tra/cài đặt/xác minh tương tác, giới hạn trong
+# bộ công cụ phân tích ngược APK/IPA (mobile-reverse-router, apk-reverse,
 # mobile-reverse, macos-reverse, diagram-generator).
 #
-# It does NOT duplicate install logic: known capabilities are delegated to
-# skills/scripts/bootstrap-reverse.sh (which already has has_cmd detection
-# and ensure_<tool> installers). This script only adds:
-#   1. a scoped tool list for the APK/IPA workflow
-#   2. an interactive y/N prompt before each install
-#   3. a final ready/missing/manual report
+# Script này KHÔNG lặp logic cài đặt: capability đã biết được giao cho
+# skills/scripts/bootstrap-reverse.sh (đã có kiểm tra has_cmd và trình cài ensure_<tool>).
+# Script này chỉ bổ sung:
+#   1. danh sách công cụ giới hạn cho quy trình APK/IPA;
+#   2. lời hỏi tương tác y/N trước mỗi lần cài;
+#   3. báo cáo cuối về trạng thái sẵn sàng/thiếu/cần cài thủ công.
 #
-# Usage:
+# Cách dùng:
 #   bash skills/scripts/ensure-tools.sh              # interactive
 #   bash skills/scripts/ensure-tools.sh --check-only  # detect only, no prompts, no installs
 #   bash skills/scripts/ensure-tools.sh --yes         # auto-confirm every install
 #
-# Supports macOS and Linux, bash 3.2+ (no associative arrays, no mapfile).
+# Hỗ trợ macOS và Linux, bash 3.2+ (không dùng associative array và mapfile).
 
 set -euo pipefail
 
