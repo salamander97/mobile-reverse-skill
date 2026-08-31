@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 *.pyc
+hs_err_pid*.log
 skills/tool-index.md
 skills/tool-index.json
 work/
