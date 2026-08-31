@@ -1,8 +1,10 @@
 {
   "cases": [
     {"hint": "decode an APK with JADX and apktool", "expect": "R1"},
+    {"hint": "find purchase billing and verifyPurchase in an authorized APK", "expect": "R1"},
     {"hint": "inspect an Android AAB and DEX", "expect": "R1"},
     {"hint": "Frida hook on an authorized iOS IPA", "expect": "R2"},
+    {"hint": "trace StoreKit subscription receipt and entitlement in an authorized IPA", "expect": "R2"},
     {"hint": "Swift Objective-C iOS framework", "expect": "R2"},
     {"hint": "analyze a macOS Mach-O dylib", "expect": "R3"},
     {"hint": "codesign and otool an app bundle", "expect": "R3"},

@@ -67,6 +67,16 @@ IDA Pro, radare2/rizin, LLDB, Hopper, class-dump, jtool2, otool, nm,
 codesign, swift-demangle, dsymutil, zipalign, and apksigner. Availability is
 machine-specific; documentation does not install or license them.
 
+## Purchase and billing flow
+
+When the goal is to understand a purchase, payment, subscription, receipt, or
+entitlement flow in an authorized APK or IPA, follow the detailed playbook in
+`references/purchase-billing-analysis.md`. It explains how to move from
+keywords to the UI entrypoint, product catalog, transaction result, network
+verification, and final entitlement without confusing an SDK string with real
+business logic. Dynamic examples are observation-only and must use a test
+account, sandbox product, and an authorized device.
+
 ## Safety and handoff
 
 Do not use bypass examples against third-party apps or devices. For any

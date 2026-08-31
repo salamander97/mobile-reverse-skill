@@ -254,6 +254,12 @@ adb pull /data/local/tmp/file .
 
 如果 Java 代码可读，先在这里定位业务逻辑。
 
+如果任务是查找 purchase/payment/billing/order 等购买逻辑，请继续阅读
+`../mobile-reverse/references/purchase-billing-analysis.md`。先搜索
+`BillingClient`、`ProductDetails`、`Purchase`、`verifyPurchase`、
+`receipt`、`entitlement` 和网络校验路径，再决定是否需要动态观察；不要
+只因为某个 SDK 中出现了 `purchase` 字符串就下结论。
+
 ### 3. Smali 与资源层确认
 
 当 `jadx` 结果不完整、混淆重、或需要实际 patch 时，切到 `apktool_out`：

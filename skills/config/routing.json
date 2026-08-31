@@ -7,8 +7,8 @@
   },
   "priority": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"],
   "routes": {
-    "R1": {"label": "Android package reverse", "skill": "apk-reverse/SKILL.md", "keywords": [{"must": "\\bapk\\b|\\baab\\b|\\bdex\\b|jadx|apktool|smali|\\bandroid\\b|bundletool"}]},
-    "R2": {"label": "Android/iOS mobile runtime", "skill": "mobile-reverse/SKILL.md", "keywords": [{"must": "\\bipa\\b|\\bios\\b|swift|objective.?c|frida|objection|ssl.?pin|root.?detect|jailbreak|mobile"}]},
+    "R1": {"label": "Android package reverse", "skill": "apk-reverse/SKILL.md", "keywords": [{"must": "\\bapk\\b|\\baab\\b|\\bdex\\b|jadx|apktool|smali|\\bandroid\\b|bundletool|purchase|payment|\\bpay\\b|billing|checkout|order|subscription|premium|entitlement|receipt|product.?id|\\bsku\\b|verify.?purchase|payload|signature|transaction", "exclude": "\\bipa\\b|\\bios\\b|swift|objective.?c"}]},
+    "R2": {"label": "Android/iOS mobile runtime", "skill": "mobile-reverse/SKILL.md", "keywords": [{"must": "\\bipa\\b|\\bios\\b|swift|objective.?c|frida|objection|ssl.?pin|root.?detect|jailbreak|mobile|purchase|payment|\\bpay\\b|billing|checkout|order|subscription|premium|entitlement|receipt|product.?id|\\bsku\\b|verify.?purchase|payload|signature|transaction", "exclude": "\\bapk\\b|\\baab\\b|\\bdex\\b|\\bandroid\\b|jadx|apktool|smali"}]},
     "R3": {"label": "Mach-O and macOS", "skill": "macos-reverse/SKILL.md", "keywords": [{"must": "mach.?o|macos|\\bapp bundle\\b|dylib|framework|codesign|launchdaemon"}]},
     "R4": {"label": "Ghidra", "skill": "ghidra-reverse/SKILL.md", "keywords": [{"must": "ghidra|analyzeheadless|headless decompil"}]},
     "R5": {"label": "IDA Pro", "skill": "ida-reverse/SKILL.md", "keywords": [{"must": "\\bida\\b|ida pro|idalib|idc|idapython"}]},

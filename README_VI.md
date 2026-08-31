@@ -57,6 +57,11 @@ bash setup.sh uninstall
 Trước mọi thao tác dynamic/device/target-facing, phải khởi tạo case với
 ủy quyền và asset trong scope; file local dùng preset `offline-sample`.
 
+Nếu cần tìm luồng mua hàng, payment, subscription, receipt hoặc entitlement,
+xem playbook chi tiết [`purchase-billing-analysis.md`](skills/mobile-reverse/references/purchase-billing-analysis.md).
+Tài liệu này có quy trình riêng cho APK/IPA, cách đọc kết quả tìm kiếm và mẫu
+ghi evidence mà không làm giả giao dịch.
+
 ## Gỡ lỗi và an toàn
 
 Chạy lại tool index nếu tool bị báo thiếu. Nếu client không đọc symlink, dùng

@@ -183,6 +183,25 @@ bash skills/scripts/case-guard.sh --case-root work/demo
 Examples and handoffs live in [`skills/mobile-reverse/SKILL.md`](skills/mobile-reverse/SKILL.md).
 Dynamic device work and traffic interception require explicit authorization.
 
+### Finding purchase and billing logic
+
+For an APK or IPA, do not search one keyword and assume you found the purchase
+check. Start with the end-to-end chain:
+
+```text
+screen/button → productId/sku → purchase API → transaction/receipt/token
+→ server verification → entitlement/premium state → feature gate
+```
+
+Search the decoded Android sources or extracted Apple binary for:
+`purchase`, `payment`, `pay`, `billing`, `checkout`, `order`, `subscription`,
+`premium`, `entitlement`, `receipt`, `productId`, `sku`, `verifyPurchase`,
+`payload`, `signature`, and `transaction`. Then follow callers and network
+requests to determine which hits are real business flow, SDK code, dead code,
+or only localized text. The detailed step-by-step playbook, including APK and
+IPA commands and an evidence checklist, is
+[`purchase-billing-analysis.md`](skills/mobile-reverse/references/purchase-billing-analysis.md).
+
 ## Install lifecycle
 
 ```bash

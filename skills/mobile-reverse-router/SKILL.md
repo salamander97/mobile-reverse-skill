@@ -18,3 +18,9 @@ APK/AAB/DEX, `macos-reverse` for Mach-O and Apple bundles,
 `reverse-engineering` for ELF/ARM/JNI, and `ghidra-reverse`, `ida-reverse`,
 or `radare2` for the chosen native analyzer. Finish with `case-review` and
 `docs-generator`.
+
+For purchase, payment, subscription, receipt, or entitlement questions, use
+`mobile-reverse/references/purchase-billing-analysis.md` after routing. The
+playbook separates catalog/UI, client transaction, proof, server verification,
+and entitlement evidence, and keeps runtime work inside an authorized test
+environment.
