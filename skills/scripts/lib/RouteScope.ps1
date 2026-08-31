@@ -1,5 +1,5 @@
-# Shared parsers for master-route route-scope.md.
-# Line-anchored so a hint containing "primary: R11" cannot steal the real PRIMARY.
+# Bộ phân tích dùng chung cho route-scope.md của master-route.
+# Neo theo đầu dòng để hint chứa "primary: R11" không thể chiếm PRIMARY thật.
 function Get-ReverseRouteScopeFields {
     [CmdletBinding()]
     param(

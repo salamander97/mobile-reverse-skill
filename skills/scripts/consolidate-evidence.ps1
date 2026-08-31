@@ -64,7 +64,7 @@ if (Test-Path -LiteralPath $reportFile) {
     Set-Content -LiteralPath $reportFile -Value ($reportContent.TrimEnd() + "`r`n`r`n" + $findingBlock + "`r`n") -Encoding UTF8 -NoNewline
 } else {
     $initialReport = @"
-# Case Report
+# Báo cáo case.
 
 ## Findings
 

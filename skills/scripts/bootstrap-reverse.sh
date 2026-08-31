@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# bootstrap-reverse.sh — generic Linux/macOS bootstrapper
+# bootstrap-reverse.sh — trình cài đặt bổ sung chung cho Linux/macOS.
 #
-# Parity target: skills/scripts/bootstrap-reverse.ps1
-# Supports the same capability names and the same high-level modes:
-#   - dependency expansion
-#   - package / release / pipx / npm installation
-#   - optional, explicit MCP host registration
-#   - optional service start with --start-services
-#   - refresh tool index unless --skip-refresh
+# Mục tiêu đồng nhất: skills/scripts/bootstrap-reverse.ps1.
+# Hỗ trợ cùng tên capability và các chế độ cấp cao:
+#   - mở rộng dependency
+#   - cài package / release / pipx / npm
+#   - đăng ký MCP host tùy chọn và phải chỉ định rõ
+#   - khởi động service tùy chọn với --start-services
+#   - làm mới tool index trừ khi có --skip-refresh
 #
-# Usage:
+# Cách dùng:
 #   bash skills/scripts/bootstrap-reverse.sh <capability1> [capability2] ... [--start-services] [--skip-refresh] [--mcp-host=none|claude|codex|both]
 #   bash skills/scripts/bootstrap-reverse.sh --list
 
@@ -303,8 +303,8 @@ ensure_pnpm() {
   fi
 }
 
-# Args: repo regex [release_tag]
-# Prints: url\tdigest_or_empty
+# Tham số: regex repo [release_tag].
+# Xuất: url\tdigest_or_empty.
 latest_github_asset_meta() {
   local repo="$1"
   local regex="$2"
@@ -335,8 +335,8 @@ latest_github_asset_url() {
   latest_github_asset_meta "$repo" "$regex" "$tag" | cut -f1
 }
 
-# verify_sha256 file expected_or_empty [github_digest]
-# expected may be "hex" or "sha256:hex"; github_digest same. Prefer expected.
+# verify_sha256 file expected_or_empty [github_digest].
+# expected có thể là "hex" hoặc "sha256:hex"; github_digest cũng vậy. Ưu tiên expected.
 verify_sha256() {
   local file="$1"
   local expected="$2"
@@ -397,7 +397,7 @@ extract_archive() {
   case "$dest.tmp" in /tmp/reverse-bootstrap-*|"$TOOLS_ROOT"/*.tmp) rm -rf "$dest.tmp" ;; esac
 }
 
-# install_github_release repo regex dest [release_tag] [expected_sha256]
+# install_github_release repo regex dest [release_tag] [expected_sha256].
 install_github_release() {
   local repo="$1"
   local regex="$2"
@@ -1050,8 +1050,8 @@ ensure_capability() {
 RESULTS_FILE="$(mktemp)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
 
-# macOS ships Bash 3.2, which has no mapfile/readarray. Keep this path portable
-# instead of requiring users to install a newer Bash just to run the bootstrapper.
+# macOS đi kèm Bash 3.2, không có mapfile/readarray. Giữ đường đi này portable
+# để người dùng không phải cài Bash mới chỉ nhằm chạy trình cài đặt bổ sung.
 EXPANDED=()
 while IFS= read -r capability; do
   [[ -n "$capability" ]] || continue

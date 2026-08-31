@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-  Scan text/markdown for un-anonymized sensitive info (IP/email/phone/JWT/API keys/tokens).
+  Quét text/markdown để tìm thông tin nhạy cảm chưa ẩn danh (IP/email/điện thoại/JWT/API key/token).
 
 .DESCRIPTION
-  Companion to skills/field-journal/anonymization.md placeholder rules.
-  Default behavior: exit 1 when findings exist (CI gate).
-  Use -ReportOnly to just report without failing.
+  Dùng cùng quy tắc mẫu trong skills/field-journal/anonymization.md.
+  Mặc định: thoát với mã 1 khi có phát hiện (cổng kiểm tra CI).
+  Dùng -ReportOnly để chỉ báo cáo mà không đánh dấu thất bại.
 
 .PARAMETER Path
-  File or directory to scan (default: skills/field-journal).
-  Directory -> recursive *.md/*.txt/*.json; File -> that file only.
+  File hoặc thư mục cần quét (mặc định: skills/field-journal).
+  Thư mục sẽ quét đệ quy *.md/*.txt/*.json; file chỉ quét chính file đó.
 
 .PARAMETER ReportOnly
-  Report findings but do not set a failing exit code.
+  Báo cáo phát hiện nhưng không đặt mã thoát thất bại.
 #>
 param(
   [string]$Path = "skills/field-journal",
@@ -21,7 +21,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Allowed sample domains (documentation examples are not leaks)
+# Các domain mẫu được phép (ví dụ trong tài liệu không phải dữ liệu rò rỉ).
 $allowedDomains = @('example.com','example.org','example.net','example.edu','example.test','test','localhost','local','invalid')
 
 $patterns = @(

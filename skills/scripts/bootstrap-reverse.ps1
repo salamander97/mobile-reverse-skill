@@ -13,7 +13,7 @@ param(
     [string]$McpHostTarget = 'None'
 )
 
-# 临时目录统一入口（$env:TEMP 在 Linux/macOS 上可能未设置）
+# Điểm vào thống nhất cho thư mục tạm ($env:TEMP có thể chưa được đặt trên Linux/macOS).
 $tmpBase = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
 
 Set-StrictMode -Version Latest
@@ -471,7 +471,7 @@ function Ensure-GitHubZipInstall {
     Expand-ArchiveIntoDirectory -ZipPath $downloadPath -Destination $TargetPath
     Remove-Item -LiteralPath $downloadPath -Force
 
-    # Refresh PATH so newly installed tools are discoverable
+    # Làm mới PATH để các công cụ vừa cài có thể được phát hiện.
     $binCandidates = @(
         (Join-Path $TargetPath 'bin'),
         $TargetPath
@@ -512,7 +512,7 @@ function Ensure-ApktoolInstall {
         'java -jar "%~dp0apktool.jar" %*'
     ) | Set-Content -LiteralPath $wrapperPath -Encoding ascii
 
-    # Add to PATH so discovery can find it immediately
+    # Thêm vào PATH để bộ phát hiện tìm thấy ngay.
     if ($env:PATH -notlike "*$installDir*") {
         $env:PATH = "$installDir;$env:PATH"
     }
@@ -525,7 +525,7 @@ function Ensure-PipPackageInstall {
 
     Ensure-PythonRuntime
     $python = Get-FirstCommandPath -Names @('python', 'python3')
-    # Use pipSource (git URL) if available, otherwise use pipPackage name
+    # Dùng pipSource (URL git) nếu có; nếu không thì dùng tên pipPackage.
     $installTarget = if ($Definition.PSObject.Properties['pipSource'] -and -not [string]::IsNullOrWhiteSpace($Definition.pipSource)) {
         $Definition.pipSource
     } else {
@@ -642,8 +642,8 @@ function Set-CodexMcpServer {
             $offset = 3
         }
 
-        # TOML is UTF-8. Decode strictly so an unexpected legacy encoding stops
-        # the update instead of being silently converted into mojibake.
+        # TOML dùng UTF-8. Giải mã nghiêm ngặt để mã hóa cũ bất ngờ làm dừng
+        # cập nhật thay vì âm thầm biến thành văn bản lỗi mã hóa.
         $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
         $text = $strictUtf8.GetString($bytes, $offset, $bytes.Length - $offset)
         $newlineMatch = [regex]::Match($text, "\r\n|\n|\r")
@@ -859,11 +859,11 @@ function Ensure-Capability {
         throw "No bootstrap definition for capability: $Name"
     }
 
-    # If capability is marked as not auto-installable, output guidance and skip
+    # Nếu capability được đánh dấu không tự cài được thì xuất hướng dẫn và bỏ qua.
     if ($definition.PSObject.Properties['canAutoInstall'] -and $definition.canAutoInstall -eq $false) {
         $hint = if ($definition.PSObject.Properties['manualInstallHint']) { $definition.manualInstallHint } else { "Please install $Name manually. Docs: $($definition.docsUrl)" }
         Write-Warning "MANUAL_INSTALL_REQUIRED: $Name — $hint"
-        # Still try to register MCP URL if applicable and a host was explicitly selected.
+        # Vẫn thử đăng ký URL MCP nếu phù hợp và đã chỉ định rõ client đích.
         if ($definition.PSObject.Properties['mcpNames'] -and $definition.PSObject.Properties['mcpUrl']) {
             Ensure-McpServer -ServerName $definition.mcpNames[0] -ServerDefinition @{ url = $definition.mcpUrl }
         }
@@ -887,7 +887,7 @@ function Ensure-Capability {
 
     switch ($definition.bootstrapKind) {
         'github-release-zip' {
-            # Generic handler for all github-release-zip capabilities
+            # Bộ xử lý chung cho mọi capability github-release-zip.
             $verifyName = if ($definition.PSObject.Properties['verifyCommand'] -and -not [string]::IsNullOrWhiteSpace($definition.verifyCommand)) {
                 $definition.verifyCommand
             } else { $Name }
@@ -944,7 +944,7 @@ function Ensure-Capability {
             if ($LASTEXITCODE -ne 0) {
                 throw "npm install -g $($definition.npmPackage) failed."
             }
-            # Run post-install command if specified (e.g. playwright install)
+            # Chạy lệnh sau cài đặt nếu có (ví dụ playwright install).
             if ($definition.PSObject.Properties['postInstall'] -and -not [string]::IsNullOrWhiteSpace($definition.postInstall)) {
                 $postParts = $definition.postInstall -split ' ', 2
                 $postCmd = Get-FirstCommandPath -Names @($postParts[0])
@@ -957,14 +957,14 @@ function Ensure-Capability {
                     }
                 }
                 else {
-                    # Try via npx
+                    # Thử thông qua npx.
                     $npx = Get-NodeCommandPath -Name 'npx'
                     if ($npx) {
                         & $npx $definition.postInstall.Split(' ')
                     }
                 }
             }
-            # Run setup script if specified
+            # Chạy script thiết lập nếu có.
             if ($definition.PSObject.Properties['setupScript'] -and -not [string]::IsNullOrWhiteSpace($definition.setupScript)) {
                 $setupPath = $definition.setupScript
                 if (Test-Path -LiteralPath $setupPath) {
@@ -1037,7 +1037,7 @@ function Ensure-Capability {
                 }
                 Write-Warning "go install failed for $Name (exit code $LASTEXITCODE)."
             }
-            # Docker fallback (parity with bootstrap-reverse.sh ensure_pentestswarm)
+            # Dự phòng Docker (đồng nhất với ensure_pentestswarm trong bootstrap-reverse.sh).
             if ($definition.PSObject.Properties['fallbackKind'] -and $definition.fallbackKind -eq 'docker-image' -and $definition.PSObject.Properties['dockerImage']) {
                 $docker = Get-FirstCommandPath -Names @('docker')
                 if (-not [string]::IsNullOrWhiteSpace($docker)) {

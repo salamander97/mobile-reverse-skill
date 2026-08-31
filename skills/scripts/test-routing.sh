@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run the shared routing benchmark through the Bash structured router.
+# Chạy benchmark định tuyến dùng chung qua bộ định tuyến Bash có cấu trúc.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -67,9 +67,9 @@ with tempfile.TemporaryDirectory(prefix="rs-routing-bash-") as scratch:
                 f"hint={hint!r} expect={expected} got={got} exit={result.returncode}"
             )
 
-    # Regression: when neither --project-root nor --out-dir is supplied, the
-    # Bash router must behave like the PowerShell router and write under the
-    # caller's current project, not under the installed reverse-skill package.
+    # Hồi quy: khi không truyền --project-root và --out-dir, router Bash phải
+    # hoạt động giống router PowerShell và ghi dưới dự án hiện tại của bên gọi,
+    # không ghi vào gói reverse-skill đã cài.
     source_skills = router_path.parent.parent
     source_config = source_skills / "config" / "routing.json"
     config = json.loads(source_config.read_text(encoding="utf-8-sig"))

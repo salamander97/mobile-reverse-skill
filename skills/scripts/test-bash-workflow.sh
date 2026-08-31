@@ -8,7 +8,7 @@ trap 'rm -rf "$SCRATCH"' EXIT
 
 echo "=== Testing Bash Workflow ==="
 
-# Test 1: case-init.sh creates proper structure
+# Kiểm thử 1: case-init.sh tạo đúng cấu trúc.
 echo "[Test 1] case-init.sh basic execution"
 bash "$SCRIPT_DIR/case-init.sh" \
   --hint "authorized web review" \
@@ -23,14 +23,14 @@ if [ ! -f "$SCRATCH/work/test-bash-01/scope.md" ]; then
     exit 1
 fi
 
-# Test 2: case-guard.sh validates valid scope
+# Kiểm thử 2: case-guard.sh xác nhận scope hợp lệ.
 echo "[Test 2] case-guard.sh accepts valid scope"
 if ! bash "$SCRIPT_DIR/case-guard.sh" --case-root "$SCRATCH/work/test-bash-01" > /dev/null; then
     echo "FAIL: case-guard rejected valid scope"
     exit 1
 fi
 
-# Test 3: case-guard.sh rejects invalid network mode
+# Kiểm thử 3: case-guard.sh từ chối chế độ mạng không hợp lệ.
 echo "[Test 3] case-guard.sh rejects invalid network mode"
 sed -i 's/mode: authorized_target_only/mode: invalid_mode/g' "$SCRATCH/work/test-bash-01/scope.md"
 if bash "$SCRIPT_DIR/case-guard.sh" --case-root "$SCRATCH/work/test-bash-01" > /dev/null 2>&1; then
@@ -38,7 +38,7 @@ if bash "$SCRIPT_DIR/case-guard.sh" --case-root "$SCRATCH/work/test-bash-01" > /
     exit 1
 fi
 
-# Test 4: case-guard.sh rejects ungranted auth
+# Kiểm thử 4: case-guard.sh từ chối ủy quyền chưa được cấp.
 echo "[Test 4] case-guard.sh rejects ungranted auth"
 sed -i 's/mode: invalid_mode/mode: authorized_target_only/g' "$SCRATCH/work/test-bash-01/scope.md"
 sed -i 's/status: granted/status: pending/g' "$SCRATCH/work/test-bash-01/scope.md"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# reverse-skill case initializer (bash parity of case-init.ps1 + offline/ctf presets)
-# Usage:
+# Trình khởi tạo case của reverse-skill (Bash đồng nhất với case-init.ps1 và preset offline/ctf).
+# Cách dùng:
 #   bash skills/scripts/case-init.sh --hint "apk reverse" --case-name demo
 #   bash skills/scripts/case-init.sh --hint "local sample" --preset offline-sample --sample ./app.apk
 #   bash skills/scripts/case-init.sh --hint "ctf web" --preset ctf-public --target-url https://chal.example
@@ -66,7 +66,7 @@ if [[ -n "$SAMPLE" ]]; then
   SAMPLE="$sample_dir/$(basename "$SAMPLE")"
 fi
 
-# Presets: reduce "AI refuses to work" friction for legitimate local/CTF work.
+# Preset giúp giảm vướng mắc khiến AI từ chối tác vụ local/CTF hợp lệ.
 case "$PRESET" in
   "" ) ;;
   offline-sample|own-sample|local-sample)
@@ -101,8 +101,8 @@ if [[ -z "$CASE_NAME" ]]; then
   CASE_NAME="$(date +%Y%m%d-%H%M%S)-${slug}"
 fi
 
-# CaseName is a directory name, never a path. Match the PowerShell guard while
-# keeping localized letters available under UTF-8 locales.
+# CaseName là tên thư mục, không phải đường dẫn. Đồng nhất với cổng PowerShell
+# và vẫn cho phép chữ bản địa trong locale UTF-8.
 case_name_length="$(printf '%s' "$CASE_NAME" | wc -m | tr -d '[:space:]')"
 if [[ -z "$CASE_NAME" || "$case_name_length" -gt 80 ||
       ! "$CASE_NAME" =~ ^[[:alnum:]] ||
@@ -160,8 +160,8 @@ fi
 if [[ -n "$NETWORK_PROFILE" ]]; then
   network_mode="$NETWORK_PROFILE"
 elif [[ "$auth_status_resolved" == "granted" && ${#ASSETS[@]} -gt 0 && -z "$SAMPLE" ]]; then
-  # Authorized network targets follow the PowerShell default. Offline is
-  # reserved for an explicit local sample, never for a URL by accident.
+  # Mục tiêu mạng được ủy quyền dùng mặc định của PowerShell. Offline chỉ dành
+  # cho mẫu local được chỉ rõ, không bao giờ vô tình áp dụng cho URL.
   network_mode="authorized_target_only"
 else
   network_mode="offline"
@@ -178,7 +178,7 @@ case "$network_mode" in
     ;;
 esac
 
-# Route PRIMARY via bash master-route
+# Định tuyến PRIMARY qua master-route bằng Bash.
 ROUTE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/rs-case-route.XXXXXX")"
 primary="reverse-engineering/SKILL.md"
 primary_id="R0"
@@ -294,7 +294,7 @@ $assets_block
 EOF
 
 cat > "$CASE_ROOT/timeline.md" <<EOF
-# Timeline (append-only)
+# Timeline (chỉ nối thêm).
 
 ## $created | lead | init
 - action: case-init
@@ -308,7 +308,7 @@ cat > "$CASE_ROOT/timeline.md" <<EOF
 EOF
 
 cat > "$CASE_ROOT/workitems.md" <<'EOF'
-# Work Items
+# Hạng mục công việc.
 
 | ID | title | role | targets | surface | status | evidence | notes |
 |----|-------|------|---------|---------|--------|----------|-------|

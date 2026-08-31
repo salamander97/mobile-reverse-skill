@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# frida-run.sh — Frida 动态注入脚本
-# 等价于 Windows 版的 frida-run.ps1
+# frida-run.sh — script tiêm Frida động.
+# Tương đương với frida-run.ps1 trên Windows.
 #
-# 用法:
+# Cách dùng:
 #   bash frida-run.sh --package <pkg> --script <js> [--usb] [--spawn]
 #   bash frida-run.sh --list-devices
 #   bash frida-run.sh --list-processes [--usb]
@@ -12,7 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KALI_BOOTSTRAP="$(cd "$SCRIPT_DIR/../../../kali/scripts" 2>/dev/null && pwd)/bootstrap-reverse.sh"
 
-# ─── 参数 ──────────────────────────────────────────────────────────────────────────
+# ─── Tham số ───────────────────────────────────────────────────────────────────────
 
 PACKAGE=""
 PROCESS=""
@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# ─── 工具检测 ──────────────────────────────────────────────────────────────────────
+# ─── Kiểm tra công cụ ───────────────────────────────────────────────────────────────
 
 ensure_frida() {
     if command -v frida &>/dev/null; then
@@ -58,7 +58,7 @@ ensure_frida() {
 
 ensure_frida
 
-# ─── 列出设备 ──────────────────────────────────────────────────────────────────────
+# ─── Liệt kê thiết bị ───────────────────────────────────────────────────────────────
 
 if [[ "$LIST_DEVICES" == "true" ]]; then
     frida-ls-devices 2>/dev/null || python3 -c "
@@ -69,7 +69,7 @@ for d in frida.enumerate_devices():
     exit 0
 fi
 
-# ─── 列出进程 ──────────────────────────────────────────────────────────────────────
+# ─── Liệt kê tiến trình ────────────────────────────────────────────────────────────
 
 if [[ "$LIST_PROCESSES" == "true" ]]; then
     if [[ "$USB" == "true" ]]; then
@@ -80,7 +80,7 @@ if [[ "$LIST_PROCESSES" == "true" ]]; then
     exit 0
 fi
 
-# ─── 注入执行 ──────────────────────────────────────────────────────────────────────
+# ─── Thực hiện tiêm ─────────────────────────────────────────────────────────────────
 
 TARGET="${PACKAGE:-$PROCESS}"
 if [[ -z "$TARGET" ]]; then

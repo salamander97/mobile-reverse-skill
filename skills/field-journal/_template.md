@@ -1,32 +1,32 @@
 # [日期] [项目简称]
 
 ## 场景分类
-<!-- APK逆向 / JS签名 / 二进制分析 / 渗透测试 / CTF / 抓包分析 / 其他 -->
+<!-- Phân tích ngược APK / ký JS / phân tích nhị phân / kiểm thử xâm nhập / CTF / phân tích bắt gói / khác -->
 
 ## 目标概述
-<!-- 一句话说明在干什么 -->
+<!-- Mô tả trong một câu đang thực hiện việc gì -->
 
 ## Scope 摘要（脱敏）
-<!-- auth.basis / network_profile.mode / in_scope 类型（勿写真实域名/IP） -->
+<!-- Loại auth.basis / network_profile.mode / in_scope (không ghi domain/IP thật) -->
 - auth_basis:
 - network_profile:
 - asset_types: []
 
 ## 角色
-<!-- lead / cie / cpe / cre / … 见 skills/ops/role-map.md -->
+<!-- lead / cie / cpe / cre / … xem skills/ops/role-map.md -->
 - lead_role: lead
 - specialists: []
 
 ## 完整执行链路
-<!-- 从拿到目标到产出结果的完整步骤，包括走过的弯路 -->
+<!-- Các bước đầy đủ từ khi nhận mục tiêu đến khi có kết quả, gồm cả đường vòng đã thử -->
 
 1. ...
 2. ...
 3. ...
 
 ## Evidence 链摘要（脱敏）
-<!-- 最多 3 条：E-id + 命令模式 + 结论类型；完整证据在用户项目 -->
-<!-- 字段对齐 skills/case-review/scripts/review_case.py 契约（见下方说明） -->
+<!-- Tối đa 3 mục: E-id + mẫu lệnh + loại kết luận; evidence đầy đủ nằm trong dự án người dùng -->
+<!-- Các trường đồng nhất với quy ước của skills/case-review/scripts/review_case.py (xem hướng dẫn bên dưới) -->
 | E-id | severity | status | source_type | 可复用命令模式 | 关联 Finding |
 |------|----------|--------|-------------|----------------|--------------|
 | E-001 | info | observed | command | `checksec --file=./pwn1` | F-001 |
@@ -56,22 +56,22 @@
 | ... | ... | ... | ... |
 
 ## 工具链发现
-<!-- 用到了哪些工具，哪些好用，哪些有坑，版本兼容性问题 -->
+<!-- Đã dùng công cụ nào, công cụ nào hữu ích, vấn đề nào cần lưu ý và tương thích phiên bản -->
 
 ## 关键代码/命令
 
 ```
-<!-- 贴实际用到的关键命令、hook 脚本、解密逻辑 -->
+<!-- Dán các lệnh chính, hook script và logic giải mã thực tế đã dùng -->
 ```
 
 ## 对本包的改进建议
-<!-- 路由是否准确？bootstrap 是否缺失？文档是否需要补充？新工具是否需要加入 manifest？ -->
+<!-- Định tuyến có chính xác không? Có thiếu bootstrap không? Có cần bổ sung tài liệu hay thêm công cụ vào manifest không? -->
 
 ## 可复用的模式/脚本片段
-<!-- 如果产出了可复用的 hook 脚本、解密逻辑、绕过方案，贴在这里 -->
+<!-- Nếu tạo được hook script, logic giải mã hoặc phương án xử lý có thể tái sử dụng, dán tại đây -->
 
 ## 进化动作
-<!-- 本次回写后实际执行了哪些更新 -->
+<!-- Sau lần ghi ngược này đã thực sự cập nhật những gì -->
 - [ ] 更新了路由矩阵
 - [ ] 更新了 tool-index
 - [ ] 更新了 bootstrap-manifest
@@ -80,7 +80,7 @@
 - [ ] 无需更新
 
 ## 环境信息
-<!-- 记录当时的关键环境 -->
+<!-- Ghi lại môi trường quan trọng tại thời điểm đó -->
 - OS:
 - 工具版本:
 - 目标平台/版本:
@@ -110,5 +110,5 @@
 4. 更新「累计统计」的总数与"最近更新"日期
 
 ---
-<!-- [进化统计] 本包累计完成项目: N | 本次新增模式: X | 本次修复工具链问题: Y -->
-<!-- [社区贡献] 完成后询问用户是否 PR 到主仓库。流程见 CONTRIBUTE-BACK.md -->
+<!-- [Thống kê cải tiến] Tổng số dự án đã hoàn thành: N | Mẫu mới lần này: X | Vấn đề toolchain đã sửa: Y -->
+<!-- [Đóng góp cộng đồng] Sau khi hoàn tất, hỏi người dùng có muốn tạo PR vào repo chính không. Xem quy trình trong CONTRIBUTE-BACK.md -->

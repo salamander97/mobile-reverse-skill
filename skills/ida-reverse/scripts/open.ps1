@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
-Open binary file via IDA HTTP API (bypass MCP schema issue)
+Mở file nhị phân qua API HTTP của IDA (tránh lỗi schema MCP).
 
 .PARAMETER Path
-Binary file path (required)
+Đường dẫn file nhị phân (bắt buộc).
 .PARAMETER SessionId
-Preferred session ID (optional, auto-generated)
+ID session ưu tiên (tùy chọn, tự tạo nếu bỏ trống).
 .PARAMETER NoAutoAnalysis
-Skip automatic analysis (faster open for large files)
+Bỏ qua phân tích tự động (mở file lớn nhanh hơn).
 .PARAMETER TimeoutSeconds
-Open timeout in seconds, returns timeout instead of blocking forever
+Thời gian chờ mở file tính bằng giây; trả timeout thay vì chặn vô hạn.
 .PARAMETER Port
-MCP HTTP port (default 13337)
+Cổng HTTP MCP (mặc định 13337).
 #>
 
 param(
@@ -68,7 +68,7 @@ else {
     }
 }
 
-# Prefer a short temp root to avoid MAX_PATH issues on Windows.
+# Ưu tiên thư mục tạm có đường dẫn ngắn để tránh lỗi MAX_PATH trên Windows.
 $TempDir = 'C:\rs-ida'
 if (-not (Test-Path -LiteralPath $TempDir)) {
     try {
@@ -116,7 +116,7 @@ function Get-OpenReadySession {
 
     $content = $listResult.result.structuredContent
     if (-not $content) {
-        # Some MCP servers put content in result.content[0].text JSON
+        # Một số máy chủ MCP đặt nội dung JSON tại result.content[0].text.
         $text = $listResult.result.content | Where-Object { $_.type -eq 'text' } | Select-Object -First 1 -ExpandProperty text
         if ($text) {
             try { $content = $text | ConvertFrom-Json } catch { $content = $null }
@@ -161,7 +161,7 @@ if (-not (Test-Path -LiteralPath $Path)) {
     exit 1
 }
 
-# Normalize to absolute path
+# Chuẩn hóa thành đường dẫn tuyệt đối.
 $Path = [System.IO.Path]::GetFullPath($Path)
 
 if ($TimeoutSeconds -le 0) {
@@ -169,7 +169,7 @@ if ($TimeoutSeconds -le 0) {
     exit 1
 }
 
-# Probe server first
+# Kiểm tra máy chủ trước.
 try {
     $null = Invoke-IdaMcp -Method 'tools/list' -Params @{} -RequestPort $Port -TimeoutSec 5
 } catch {
@@ -178,7 +178,7 @@ try {
     exit 1
 }
 
-# System32 / locked DB -> temp copy
+# Nếu là System32 hoặc cơ sở dữ liệu bị khóa thì sao chép sang thư mục tạm.
 $isTempCopy = $Path.StartsWith($TempDir, [StringComparison]::OrdinalIgnoreCase)
 
 if (-not $isTempCopy -and $Path -match "C:\\Windows\\System32") {
@@ -218,7 +218,7 @@ $arguments = @{
     mode                 = 'prefer_headless'
 }
 $argJson = $arguments | ConvertTo-Json -Compress
-# Keep boolean literals as JSON bools for background job
+# Giữ giá trị boolean ở dạng boolean JSON cho tác vụ nền.
 $bodyObj = @{
     jsonrpc = '2.0'
     id      = 1
@@ -322,7 +322,7 @@ try {
             $errMsg = [string]$structured.error
         }
         if ($null -ne $structured.PSObject.Properties['session'] -and $structured.session -and -not $success) {
-            # Some builds return session without success flag
+            # Một số bản dựng trả về session nhưng không có cờ thành công.
             $success = $true
             $session = $structured.session
         }
@@ -336,7 +336,7 @@ try {
         exit 0
     }
 
-    # Auto-fallback: temp copy retry (skip if license / idalib hard failure)
+    # Dự phòng tự động: thử lại bằng bản sao tạm (bỏ qua nếu lỗi cứng do license/idalib).
     $hardFail = $false
     if ($errMsg -and ($errMsg -match 'license|EULA|Cannot continue without a valid license|batch mode')) {
         $hardFail = $true

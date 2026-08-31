@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Portable installer for Codex and Claude Code skill directories.
+# Trình cài đặt portable cho thư mục skill của Codex và Claude Code.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"

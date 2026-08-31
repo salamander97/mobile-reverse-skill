@@ -1,16 +1,16 @@
 ﻿<#
 .SYNOPSIS
-Start IDA Pro MCP HTTP server (background, non-blocking)
+Khởi động máy chủ HTTP MCP của IDA Pro ở chế độ nền, không chặn.
 
 .DESCRIPTION
-1. Resolve IDADIR (env / portable IDA / registry / common paths)
-2. Resolve idalib-mcp (PATH, IDA Python314 Scripts, or python -m)
-3. If HTTP already healthy, reuse it (unless -Force)
-4. Otherwise kill stale listeners and start a logged supervisor
-5. Wait for service ready (max 30 seconds)
-6. Output OK:<tool_count>, OK:<tool_count>:reuse, or ERR:...
+1. Xác định IDADIR (biến môi trường, IDA portable, registry hoặc đường dẫn phổ biến).
+2. Xác định idalib-mcp (PATH, thư mục Scripts của IDA Python314 hoặc python -m).
+3. Nếu HTTP đang hoạt động thì dùng lại, trừ khi có -Force.
+4. Nếu không, dừng listener cũ và khởi động supervisor có ghi log.
+5. Chờ dịch vụ sẵn sàng, tối đa 30 giây.
+6. Xuất OK:<tool_count>, OK:<tool_count>:reuse hoặc ERR:...
 
-Usage: run without parameters
+Cách dùng: chạy không cần tham số.
 #>
 
 param(
@@ -65,7 +65,7 @@ function Probe-IdaMcp {
         $tools = @($r.result.tools)
         $count = $tools.Count
         $names = @($tools | ForEach-Object { $_.name })
-        # Supervisor without --unsafe is "up" but missing py_eval. Treat as stale.
+        # Supervisor không có --unsafe vẫn "đang chạy" nhưng thiếu py_eval; coi là đã cũ.
         if ($count -gt 0 -and ($names -contains 'py_eval')) {
             return @{ Status = 'healthy'; Count = $count; Owners = $owners; GuiOwners = $guiOwners }
         }
@@ -77,8 +77,8 @@ function Probe-IdaMcp {
     if ($guiOwners.Count -gt 0) {
         return @{ Status = 'gui_busy'; Count = 0; Owners = $owners; GuiOwners = $guiOwners }
     }
-    # Single-threaded supervisor cannot answer tools/list during idb_open.
-    # A listen socket is busy, not dead — never taskkill on RPC timeout.
+    # Supervisor một luồng không thể trả lời tools/list trong lúc idb_open.
+    # Socket đang lắng nghe nghĩa là bận, không phải đã chết; không taskkill khi RPC timeout.
     if ($listening) {
         return @{ Status = 'busy'; Count = 0; Owners = $owners; GuiOwners = $guiOwners }
     }
@@ -139,7 +139,7 @@ function Stop-IdaMcpManagedProcess {
     param([int]$ProcessId)
     if ($ProcessId -le 0) { return }
     if (Test-IdaGuiProcess -ProcessId $ProcessId) { return }
-    # No /T: force_gui may have spawned ida.exe as a child of the supervisor.
+    # Không có /T: force_gui có thể đã tạo ida.exe làm tiến trình con của supervisor.
     & taskkill.exe /F /PID $ProcessId 2>$null | Out-Null
 }
 
@@ -230,7 +230,7 @@ function Test-PythonHasIdaProMcp {
     if ([string]::IsNullOrWhiteSpace($PythonExe) -or -not (Test-Path -LiteralPath $PythonExe)) {
         return $false
     }
-    # pythonw.exe has no console — probe with sibling python.exe when possible
+    # pythonw.exe không có console; nếu có thể thì kiểm tra bằng python.exe cùng thư mục.
     $probeExe = $PythonExe
     if ($PythonExe -match '(?i)pythonw\.exe$') {
         $sibling = Join-Path (Split-Path $PythonExe -Parent) 'python.exe'
@@ -265,7 +265,7 @@ function Find-IdalibServer {
         return @{ Mode = 'exe'; Path = $PreferredServerPath }
     }
 
-    # Prefer direct `pythonw -m ida_pro_mcp.idalib_supervisor` (no console window; more stable than .cmd)
+    # Ưu tiên `pythonw -m ida_pro_mcp.idalib_supervisor` trực tiếp (không mở console, ổn định hơn .cmd).
     $pythonCandidates = @(
         (Join-Path $IdaDirPath 'Python314\pythonw.exe'),
         (Join-Path $IdaDirPath 'Python314\python.exe'),
@@ -282,7 +282,7 @@ function Find-IdalibServer {
     ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
 
     foreach ($py in $pythonCandidates) {
-        # `py` launcher is not a real interpreter for -m in Start-Process; skip bare py.exe
+        # Trình khởi chạy `py` không phải trình thông dịch thật cho -m trong Start-Process; bỏ qua py.exe đơn lẻ.
         if ($py -match '\\py\.exe$') { continue }
         if (Test-PythonHasIdaProMcp -PythonExe $py) {
             $launch = Get-WindowlessPythonPath -PythonExe $py
@@ -290,7 +290,7 @@ function Find-IdalibServer {
         }
     }
 
-    # Prefer native .exe entrypoints over .cmd wrappers
+    # Ưu tiên entrypoint .exe gốc thay vì wrapper .cmd.
     $scriptCandidates = @(
         (Join-Path $env:LOCALAPPDATA 'Python\pythoncore-3.14-64\Scripts\idalib-mcp.exe'),
         (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\Scripts\idalib-mcp.exe'),
@@ -366,7 +366,7 @@ if (-not $resolvedIdaDir) {
 $IdaDir = $resolvedIdaDir
 $env:IDADIR = $IdaDir
 
-# Ensure IDA bins + bundled Python are visible to the child process
+# Bảo đảm thư mục IDA và Python đi kèm hiển thị với tiến trình con.
 $idaPythonDir = Join-Path $IdaDir 'Python314'
 if (-not (Test-Path -LiteralPath $idaPythonDir)) {
     $idaPythonDir = Join-Path $IdaDir 'python'
@@ -375,7 +375,7 @@ $env:PATH = "$IdaDir;$idaPythonDir;$(Join-Path $idaPythonDir 'Scripts');$env:PAT
 
 $server = Find-IdalibServer -IdaDirPath $IdaDir -PreferredServerPath $ServerPath
 
-# Auto-bootstrap only if still missing
+# Chỉ tự động cài đặt bổ sung nếu vẫn còn thiếu.
 if (-not $server) {
     $bootstrapScript = Join-Path $PSScriptRoot '..\..\scripts\bootstrap-reverse.ps1'
     if (Test-Path -LiteralPath $bootstrapScript) {
@@ -390,8 +390,8 @@ if (-not $server) {
     exit 1
 }
 
-# Replace only when down or stale (no py_eval). Busy/gui already exited above
-# unless -Force. Never taskkill ida.exe; never use /T.
+# Chỉ thay thế khi dịch vụ đã tắt hoặc cũ (không có py_eval). Trạng thái bận/giao diện
+# đã được xử lý ở trên, trừ khi có -Force. Không taskkill ida.exe và không dùng /T.
 foreach ($procName in @('ida-pro-mcp', 'idalib-mcp', 'idalib_supervisor')) {
     $old = Get-Process -Name $procName -ErrorAction SilentlyContinue
     if ($old) {
@@ -406,7 +406,7 @@ foreach ($managedPid in @(Get-ManagedSupervisorProcessIds)) {
 Start-Sleep -Seconds 1
 
 $wrapper = Join-Path $PSScriptRoot 'run-supervisor.py'
-# --unsafe exposes py_eval / py_exec_file. dbg_* stay hidden (need ?ext=dbg; do not add).
+# --unsafe mở py_eval / py_exec_file. dbg_* vẫn ẩn (cần ?ext=dbg; không thêm vào).
 $argList = @('--host', '127.0.0.1', '--port', "$Port", '--unsafe')
 if (Test-Path -LiteralPath $wrapper) {
     $filePath = $server.Path
@@ -438,9 +438,9 @@ Write-Output "INFO:server=$filePath $($argList -join ' ')"
 Write-Output "INFO:log=$logFile"
 Write-Output 'INFO:window=hidden (pythonw / no console)'
 
-# Detached + hidden start:
-# pythonw + run-supervisor.py keeps logs without a cmd.exe window.
-# Win32_Process.Create so the server survives agent/terminal Job Objects.
+# Khởi động tách biệt và ẩn:
+# pythonw + run-supervisor.py ghi log mà không mở cửa sổ cmd.exe.
+# Win32_Process.Create giúp máy chủ sống qua Job Object của agent/terminal.
 $quotedArgs = foreach ($a in $argList) {
     if ($a -match '[\s"]') { '"' + ($a -replace '"', '\"') + '"' } else { $a }
 }
@@ -487,7 +487,7 @@ if ($procId -le 0) {
 }
 Write-Output "INFO:pid=$procId"
 
-# Wait for readiness via MCP tools/list
+# Chờ sẵn sàng thông qua MCP tools/list.
 $ready = $false
 $toolCount = 0
 for ($i = 0; $i -lt $WaitSeconds; $i++) {

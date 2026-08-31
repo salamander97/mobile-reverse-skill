@@ -72,9 +72,9 @@ exec "$REAL_PYTHON" "\$@"
 STUB
 chmod +x "$STUB_BIN/python3"
 
-# Keep the Kali subflow hermetic on generic Linux/macOS hosts. The Kali
-# bootstrap reads its manifest with jq, but this regression test must not
-# depend on the host having jq installed just to exercise that code path.
+# Giữ luồng Kali độc lập trên host Linux/macOS thông thường. Bootstrap Kali
+# đọc manifest bằng jq, nhưng kiểm thử hồi quy này không được phụ thuộc host
+# đã cài jq chỉ để chạy qua đường code đó.
 JQ_STUB_PY="$SCRATCH/jq-stub.py"
 cat > "$JQ_STUB_PY" <<'PY'
 import json
@@ -177,7 +177,7 @@ pnpm_package=$(json_value dependency pnpm)
 anything_repo=$(json_value anything-analyzer repoUrl)
 anything_pin=$(json_value anything-analyzer pinnedCommit)
 
-# The manifest parser is bootstrapped before a Node-only sink, without installing pipx.
+# Bộ phân tích manifest được bootstrap trước sink chỉ dùng Node, không cài pipx.
 NO_PYTHON_BIN="$SCRATCH/no-python-bin"
 PARSER_FIXTURE="$SCRATCH/parser-bootstrap"
 mkdir -p "$NO_PYTHON_BIN"
@@ -207,7 +207,7 @@ if grep -Fq '|pip|install|' "$CALL_LOG"; then
   exit 1
 fi
 
-# A required empty manifest field fails before any package-manager sink.
+# Trường bắt buộc trong manifest nếu rỗng phải thất bại trước mọi sink của trình quản lý package.
 BROKEN_DIR="$SCRATCH/broken-bootstrap"
 mkdir -p "$BROKEN_DIR"
 cp "$BOOTSTRAP" "$BROKEN_DIR/bootstrap-reverse.sh"
@@ -231,7 +231,7 @@ if grep -Eq '^npm\|install\|-g(\||$)' "$CALL_LOG"; then
   exit 1
 fi
 
-# Table: each generic package-manager sink receives its canonical manifest value.
+# Bảng: mỗi sink quản lý package chung nhận đúng giá trị chuẩn từ manifest.
 while IFS='|' read -r capability _field expected; do
   : > "$CALL_LOG"
   STUB_PIPX_VERSION=1.16.5 run_generic "$capability" --skip-refresh >/dev/null
@@ -244,7 +244,7 @@ proxycat|repo|pipx|install|git+$(json_value proxycat repo)@$(json_value proxycat
 pwntools|pipPackage|pipx|install|$(json_value pwntools pipPackage)
 EOF
 
-# pipx itself is pinned; a failed pinned install has no mutable fallback.
+# Chính pipx cũng được ghim phiên bản; cài bản đã ghim thất bại thì không có dự phòng thay đổi được.
 : > "$CALL_LOG"
 if STUB_FAIL_PIP_INSTALL=1 run_generic frida --skip-refresh >/dev/null 2>&1; then
   exit 1
@@ -256,7 +256,7 @@ if grep -Eq '^pipx\|(install|upgrade)' "$CALL_LOG"; then
   exit 1
 fi
 
-# Generic Anything Analyzer: staged checkout, pinned pnpm, frozen install, clean recheck, then dev.
+# Anything Analyzer chung: checkout theo giai đoạn, pnpm đã ghim, cài đóng băng, kiểm tra sạch lại rồi mới dev.
 : > "$CALL_LOG"
 STUB_PIPX_VERSION=1.16.5 STUB_PNPM_VERSION=0 run_generic anything-analyzer --start-services --skip-refresh >/dev/null
 anything_dir="$SCRATCH/tools/anything-analyzer"
@@ -268,12 +268,12 @@ expect_fragment "fetch|--depth|1|origin|$anything_pin"
 [[ -d "$anything_dir/.git" ]]
 [[ $(grep -c '|status|--porcelain|--untracked-files=all' "$CALL_LOG") -ge 2 ]]
 
-# Dirty sources never reach install/dev.
+# Nguồn có thay đổi ngoài dự kiến không bao giờ được đưa tới install/dev.
 touch "$anything_dir/.stub-dirty"
 rejects_without_pnpm run_generic anything-analyzer --start-services --skip-refresh
 rm "$anything_dir/.stub-dirty"
 
-# Failed fetch leaves no final checkout or staging poison; a retry can succeed.
+# Fetch thất bại không để lại checkout cuối hoặc dữ liệu rác trong staging; lần thử lại vẫn có thể thành công.
 retry_root="$SCRATCH/retry-tools"
 TEST_TOOLS_ROOT="$retry_root" STUB_FAIL_FETCH=1 rejects_without_pnpm run_generic anything-analyzer --start-services --skip-refresh
 [[ ! -e "$retry_root/anything-analyzer" ]]
@@ -282,7 +282,7 @@ TEST_TOOLS_ROOT="$retry_root" STUB_FAIL_FETCH=1 rejects_without_pnpm run_generic
 TEST_TOOLS_ROOT="$retry_root" STUB_PNPM_VERSION=10.24.0 run_generic anything-analyzer --start-services --skip-refresh >/dev/null
 [[ -d "$retry_root/anything-analyzer/.git" ]]
 
-# Kali exercises the same source-before-execution boundary where associative arrays are supported.
+# Kali kiểm thử cùng ranh giới nguồn-trước-thực-thi ở nơi associative array được hỗ trợ.
 if (( BASH_VERSINFO[0] >= 4 )); then
   kali_dir="$SCRATCH/home/tools/anything-analyzer"
   rm -rf "$kali_dir"

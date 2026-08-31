@@ -150,8 +150,8 @@ def parse_scope(root, issues, strict):
     result["network_mode"] = field_value(network, "mode").lower()
     result["ready_for_act"] = field_value(signoff, "ready_for_act").lower()
 
-    # Only a top-level "- field:" ends the assets block. Indented Windows
-    # paths such as "  - D:\\repo" contain a colon but are asset values.
+    # Chỉ dòng "- field:" ở cấp cao nhất mới kết thúc khối tài sản. Đường dẫn
+    # Windows thụt vào như "  - D:\\repo" có dấu hai chấm nhưng vẫn là giá trị tài sản.
     assets_match = re.search(r"(?ms)^\s*-\s+assets:\s*\n(?P<body>.*?)(?=^-\s+[A-Za-z0-9_]+:|\Z)", scope_section)
     if assets_match:
         result["assets"] = [

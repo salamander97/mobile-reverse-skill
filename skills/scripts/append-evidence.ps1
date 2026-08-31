@@ -1,17 +1,17 @@
 ﻿#Requires -Version 5.1
-# Append one Evidence item under work/<case>/evidence/ (ops Evidence contract).
+# Thêm một mục Evidence vào work/<case>/evidence/ theo quy ước Evidence vận hành.
 #
-# Usage (simple):
+# Cách dùng đơn giản:
 #   powershell -File skills/scripts/append-evidence.ps1 -CaseRoot work\my-case `
 #     -Id E-001 -Title "Open clock API" -ReproCommand 'curl -sI https://example/' `
 #     -Severity info -Status observed
 #
-# Special characters / spaces / quotes in excerpts (recommended for nested -File):
+# Ký tự đặc biệt / khoảng trắng / dấu nháy trong excerpt (khuyến nghị khi gọi lồng qua -File):
 #   Set-Content excerpt.txt -Value '"XML parsing error" / Entities are not allowed'
 #   powershell -File skills/scripts/append-evidence.ps1 ... -RawExcerptFile excerpt.txt
 #
-# NOTE: Nested `powershell -File` splits unquoted multi-word values. Prefer -RawExcerptFile
-# or call the script in-process: & .\append-evidence.ps1 -RawExcerpt 'full text here'
+# LƯU Ý: `powershell -File` lồng sẽ tách giá trị nhiều từ nếu không đặt trong dấu nháy.
+# Ưu tiên -RawExcerptFile hoặc gọi script trong cùng tiến trình: & .\append-evidence.ps1 -RawExcerpt 'full text here'.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
@@ -39,7 +39,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-# Advanced functions reject unknown positionals at bind time; keep explicit check for edge hosts.
+# Hàm nâng cao từ chối tham số vị trí lạ lúc bind; vẫn giữ kiểm tra rõ ràng cho host đặc biệt.
 if ($args -and $args.Count -gt 0) {
     $extra = ($args | ForEach-Object { [string]$_ }) -join ' | '
     throw ("Unexpected arguments (likely -RawExcerpt/-Title quoting broke multi-word value): {0}. Use -RawExcerptFile for special characters, or pass a single quoted string." -f $extra)
@@ -75,7 +75,7 @@ if (-not (Test-Path -LiteralPath $CaseRoot)) {
     throw "CaseRoot does not exist: $CaseRoot"
 }
 
-# File overrides beat inline strings (safe path for special characters under powershell -File)
+# Nội dung từ file được ưu tiên hơn chuỗi inline (an toàn cho ký tự đặc biệt khi dùng powershell -File).
 $fromReproFile = Read-OptionalFile $ReproCommandFile
 if ($null -ne $fromReproFile) { $ReproCommand = $fromReproFile }
 
@@ -185,7 +185,7 @@ $index = Join-Path $evDir 'INDEX.md'
 $line = "- $idSafe | $sev | $st | $titleLine | $fileName"
 if (-not (Test-Path -LiteralPath $index)) {
     $hdr = @"
-# Evidence index
+# Chỉ mục Evidence.
 
 | id | severity | status | title | file |
 |----|----------|--------|-------|------|

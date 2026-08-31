@@ -67,7 +67,7 @@ function Get-ToolPath {
         }
     }
 
-    # Attempt auto-bootstrap for frida tools
+    # Thử tự động cài đặt bổ sung các công cụ Frida.
     $bootstrapScript = Join-Path $PSScriptRoot '..\..\scripts\bootstrap-reverse.ps1'
     if (($Name -in @('frida', 'frida-ps', 'frida-ls-devices')) -and (Test-Path -LiteralPath $bootstrapScript)) {
         Write-Host "INFO: $Name not found, attempting auto-bootstrap (pip install frida-tools)..." -ForegroundColor Yellow

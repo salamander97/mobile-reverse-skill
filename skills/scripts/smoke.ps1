@@ -1,6 +1,6 @@
 ﻿#Requires -Version 5.1
-# reverse-skill smoke entrypoint: verify + script parse + master-route sample matrix.
-# Usage:
+# Điểm vào smoke của reverse-skill: kiểm tra + phân tích script + ma trận mẫu master-route.
+# Cách dùng:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/smoke.ps1
 #   powershell -File skills/scripts/smoke.ps1 -LogDir C:\path\to\logs
 param(
@@ -28,9 +28,9 @@ function Bad([string] $m) {
     [void]$fail.Add($m)
 }
 
-# Prefer the same host that launched smoke (pwsh on GHA windows-latest).
-# Bare "powershell" often resolves to Windows PowerShell 5.1, which mis-parses
-# UTF-8 scripts without BOM when nested from pwsh.
+# Ưu tiên cùng host đã khởi chạy smoke (pwsh trên GHA windows-latest).
+# Lệnh "powershell" đơn lẻ thường trỏ tới Windows PowerShell 5.1, có thể phân tích
+# sai script UTF-8 không BOM khi được gọi lồng từ pwsh.
 $SmokeHostExe = $null
 try {
     $procPath = (Get-Process -Id $PID -ErrorAction Stop).Path
@@ -46,7 +46,7 @@ if (-not $SmokeHostExe) {
 }
 Write-Host ("=== reverse-skill smoke | LogDir={0} | Host={1} ===" -f $LogDir, $SmokeHostExe)
 
-# --- 1) routing coherence ---
+# --- 1) Tính nhất quán định tuyến ---
 $verify = Join-Path $scriptDir 'verify-routing-coherence.ps1'
 if (-not (Test-Path -LiteralPath $verify)) {
     Bad 'verify-routing-coherence.ps1 missing'
@@ -58,7 +58,7 @@ if (-not (Test-Path -LiteralPath $verify)) {
     if ($verifyExit -eq 0) { Ok 'verify-routing-coherence exit 0' } else { Bad ("verify-routing-coherence exit {0}" -f $verifyExit) }
 }
 
-# --- 2) parse key scripts ---
+# --- 2) Phân tích cú pháp các script chính ---
 $scripts = @(
     'verify-routing-coherence.ps1',
     'master-route.ps1',
@@ -79,7 +79,7 @@ $parseLog = New-Object System.Collections.Generic.List[string]
 foreach ($name in $scripts) {
     $p = Join-Path $scriptDir $name
     if (-not (Test-Path -LiteralPath $p)) {
-        # append-evidence is required for P0; others should exist
+        # append-evidence là bắt buộc cho P0; các script khác cũng nên tồn tại.
         if ($name -eq 'append-evidence.ps1' -or $name -eq 'smoke.ps1') {
             Bad ("script missing: {0}" -f $name)
             $parseFail++
@@ -102,7 +102,7 @@ foreach ($name in $scripts) {
 }
 $parseLog -join [Environment]::NewLine | Set-Content (Join-Path $LogDir '02-parse.txt') -Encoding UTF8
 
-# --- 3) Codex config UTF-8 round-trip regression ---
+# --- 3) Hồi quy vòng đọc-ghi UTF-8 của cấu hình Codex ---
 $encodingTest = Join-Path $scriptDir 'test-bootstrap-codex-encoding.ps1'
 if (-not (Test-Path -LiteralPath $encodingTest)) {
     Bad 'test-bootstrap-codex-encoding.ps1 missing'
@@ -119,7 +119,7 @@ if (-not (Test-Path -LiteralPath $encodingTest)) {
     }
 }
 
-# --- 4) master-route sample matrix ---
+# --- 4) Ma trận mẫu master-route ---
 $mr = Join-Path $scriptDir 'master-route.ps1'
 $cases = @(
     @{ Name = 'apk'; Hint = 'decompile APK with jadx apktool smali'; Expect = 'apk-reverse' },
@@ -155,7 +155,7 @@ if (-not (Test-Path -LiteralPath $mr)) {
 }
 $routeSummary -join [Environment]::NewLine | Set-Content (Join-Path $LogDir '03-route-summary.txt') -Encoding UTF8
 
-# --- 5) Evidence ID immutability ---
+# --- 5) Evidence ID không bị thay đổi ---
 $appendEvidence = Join-Path $scriptDir 'append-evidence.ps1'
 $evidenceCase = Join-Path $LogDir 'evidence-immutability'
 if (-not (Test-Path -LiteralPath $appendEvidence)) {
@@ -197,7 +197,7 @@ if (-not (Test-Path -LiteralPath $appendEvidence)) {
     }
 }
 
-# --- summary ---
+# --- Tóm tắt ---
 $summary = @(
     "VERIFY_EXIT=$verifyExit",
     "PARSE ok=$parseOk fail=$parseFail",

@@ -1,12 +1,12 @@
 ﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
-  Regenerate docs/assets/star-history.svg from GitHub stargazers API.
+  Tạo lại docs/assets/star-history.svg từ API người theo dõi GitHub.
 
 .DESCRIPTION
-  Uses git credential manager token (or GH_TOKEN / GITHUB_TOKEN env).
-  Requires repo admin/collaborator access (GitHub July 2026 stargazer restriction).
-  Writes UTF-8 SVG without BOM. Does not commit.
+  Dùng token của trình quản lý thông tin xác thực Git (hoặc biến môi trường GH_TOKEN / GITHUB_TOKEN).
+  Yêu cầu quyền quản trị/cộng tác viên repo (giới hạn stargazer của GitHub tháng 7 năm 2026).
+  Ghi SVG UTF-8 không BOM. Không tạo commit.
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/update-star-history.ps1

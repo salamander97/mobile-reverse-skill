@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# decode.sh — APK 解包（jadx 反编译 + apktool 解包）
-# 等价于 Windows 版的 decode.ps1
+# decode.sh — giải nén APK (dịch ngược bằng jadx và giải gói bằng apktool)
+# Tương đương với decode.ps1 trên Windows.
 #
-# 用法:
+# Cách dùng:
 #   bash decode.sh <apk_path> [--name <task_name>] [--out <output_dir>]
 #                              [--skip-jadx] [--skip-apktool] [--clean]
 
@@ -11,7 +11,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KALI_BOOTSTRAP="$(cd "$SCRIPT_DIR/../../../kali/scripts" 2>/dev/null && pwd)/bootstrap-reverse.sh"
 
-# ─── 参数解析 ──────────────────────────────────────────────────────────────────────
+# ─── Phân tích tham số ──────────────────────────────────────────────────────────────
 
 APK_PATH=""
 TASK_NAME=""
@@ -42,7 +42,7 @@ if [[ ! -f "$APK_PATH" ]]; then
     exit 1
 fi
 
-# ─── 工具检测与自动安装 ─────────────────────────────────────────────────────────────
+# ─── Kiểm tra công cụ và tự động cài đặt ────────────────────────────────────────────
 
 ensure_tool() {
     local name="$1"
@@ -63,7 +63,7 @@ ensure_tool() {
 [[ "$SKIP_JADX" != "true" ]] && ensure_tool "jadx"
 [[ "$SKIP_APKTOOL" != "true" ]] && ensure_tool "apktool"
 
-# ─── 路径计算 ──────────────────────────────────────────────────────────────────────
+# ─── Tính toán đường dẫn ────────────────────────────────────────────────────────────
 
 APK_BASENAME=$(basename "$APK_PATH" .apk | sed 's/[^A-Za-z0-9._-]/_/g')
 TASK_NAME="${TASK_NAME:-$APK_BASENAME}"
@@ -78,7 +78,7 @@ fi
 
 mkdir -p "$TASK_ROOT"
 
-# ─── jadx 反编译 ──────────────────────────────────────────────────────────────────
+# ─── Dịch ngược bằng jadx ───────────────────────────────────────────────────────────
 
 JADX_EXIT=0
 if [[ "$SKIP_JADX" != "true" ]]; then
@@ -87,7 +87,7 @@ if [[ "$SKIP_JADX" != "true" ]]; then
     jadx -d "$JADX_OUT" "$APK_PATH" || JADX_EXIT=$?
 fi
 
-# ─── apktool 解包 ─────────────────────────────────────────────────────────────────
+# ─── Giải gói bằng apktool ──────────────────────────────────────────────────────────
 
 APKTOOL_EXIT=0
 if [[ "$SKIP_APKTOOL" != "true" ]]; then
@@ -96,7 +96,7 @@ if [[ "$SKIP_APKTOOL" != "true" ]]; then
     apktool d "$APK_PATH" -o "$APKTOOL_OUT" -f || APKTOOL_EXIT=$?
 fi
 
-# ─── 统计输出 ──────────────────────────────────────────────────────────────────────
+# ─── Xuất thống kê ──────────────────────────────────────────────────────────────────
 
 PACKAGE=""
 if [[ -f "$APKTOOL_OUT/AndroidManifest.xml" ]]; then

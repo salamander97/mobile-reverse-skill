@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-Launch portable IDA Pro GUI (with MCP plugin). Prefer this when headless idalib license fails.
+Khởi chạy giao diện IDA Pro portable (có plugin MCP). Ưu tiên cách này khi license idalib chạy không giao diện bị lỗi.
 
 .DESCRIPTION
-1. Resolve IDADIR
-2. Optionally open a binary path
-3. Start IDA GUI so the ida_mcp plugin can autostart HTTP on 127.0.0.1:13337
+1. Xác định IDADIR.
+2. Tùy chọn mở đường dẫn file nhị phân.
+3. Khởi chạy giao diện IDA để plugin ida_mcp tự mở HTTP tại 127.0.0.1:13337.
 
-Usage:
+Cách dùng:
   powershell -File start-gui.ps1
   powershell -File start-gui.ps1 -Path C:\target.exe
 #>
@@ -58,7 +58,7 @@ if (-not (Test-IdaInstallDir $IdaDir)) {
 
 $env:IDADIR = [System.IO.Path]::GetFullPath($IdaDir)
 $portableRoot = Split-Path (Split-Path $env:IDADIR -Parent) -Parent
-# Desktop\IDA Pro 9.4\App\IDA Pro -> Desktop\IDA Pro 9.4
+# Desktop\IDA Pro 9.4\App\IDA Pro -> Desktop\IDA Pro 9.4.
 if ((Split-Path $env:IDADIR -Leaf) -eq 'IDA Pro') {
     $maybe = Split-Path (Split-Path $env:IDADIR -Parent) -Parent
     if (Test-Path (Join-Path $maybe 'Launch-IDA-Pro.cmd')) {
@@ -77,7 +77,7 @@ if ($UsePortableLauncher -or (Test-Path (Join-Path $portableRoot 'Launch-IDA-Pro
                 Write-Output 'ERR:file_not_found'
                 exit 1
             }
-            # Portable launcher starts IDA; then user/file can be passed to ida.exe directly instead
+            # Trình khởi chạy portable đã mở IDA; sau đó có thể truyền người dùng/file trực tiếp cho ida.exe.
             $target = [System.IO.Path]::GetFullPath($Path)
             Start-Process -FilePath (Join-Path $env:IDADIR 'ida.exe') -ArgumentList @('"' + $target + '"') -WorkingDirectory $env:IDADIR
         } else {

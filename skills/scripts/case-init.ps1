@@ -1,10 +1,10 @@
 ﻿#Requires -Version 5.1
-# Initialize work/<case>/ with scope, timeline, workitems (reverse-skill ops contract).
-# Bare invocation keeps pending/offline defaults.
-# Ready-to-act example:
+# Khởi tạo work/<case>/ với scope, timeline và workitems theo quy ước vận hành reverse-skill.
+# Gọi không tham số sẽ giữ mặc định pending/offline.
+# Ví dụ sẵn sàng thực hiện:
 #   powershell -File skills/scripts/case-init.ps1 -Hint "web pentest" -CaseName my-case `
 #     -AuthGranted -TargetUrl "https://app.example/" -NetworkProfile authorized_target_only
-# Offline sample ready-to-act example:
+# Ví dụ mẫu offline sẵn sàng thực hiện:
 #   powershell -File skills/scripts/case-init.ps1 -Hint "offline apk" -CaseName my-sample `
 #     -Preset offline-sample -Sample ".\app.apk"
 param(
@@ -53,7 +53,7 @@ if (-not [string]::IsNullOrWhiteSpace($Sample)) {
     }
 }
 
-# Cross-platform case presets. Keep semantics aligned with case-init.sh.
+# Preset case đa nền tảng. Giữ ngữ nghĩa đồng nhất với case-init.sh.
 $presetNormalized = $Preset.Trim().ToLowerInvariant()
 if ($presetNormalized -in @('offline-sample', 'own-sample', 'local-sample')) {
     $AuthGranted = $true
@@ -87,9 +87,9 @@ if (-not $CaseName) {
     $CaseName = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $slug
 }
 
-# CaseName is a directory name, not a path. Keep every case under projectRoot/work.
-# The pattern allows localized names but excludes Windows path syntax and names that
-# Windows would normalize into a dot segment (for example, '.. ' or 'case.').
+# CaseName là tên thư mục, không phải đường dẫn. Giữ mọi case dưới projectRoot/work.
+# Mẫu cho phép tên có chữ bản địa nhưng loại cú pháp đường dẫn Windows và tên mà
+# Windows sẽ chuẩn hóa thành đoạn dấu chấm (ví dụ '.. ' hoặc 'case.').
 if ([string]::IsNullOrWhiteSpace($CaseName) -or
     $CaseName -notmatch '^[\p{L}\p{N}][\p{L}\p{N}._ -]{0,79}$' -or
     $CaseName -match '[.\s]$') {
@@ -108,9 +108,9 @@ foreach ($d in $dirs) {
     New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $d) | Out-Null
 }
 
-# Resolve auth / network / assets
-# Priority: explicit -AuthStatus (only if bound) > -AuthGranted > pending.
-# Never let a stray positional string overwrite AuthGranted.
+# Xác định ủy quyền / mạng / tài sản.
+# Ưu tiên: -AuthStatus rõ ràng (chỉ khi đã bind) > -AuthGranted > pending.
+# Không bao giờ để chuỗi vị trí thừa ghi đè AuthGranted.
 $authStatusResolved = 'pending'
 if ($AuthGranted) { $authStatusResolved = 'granted' }
 if ($PSBoundParameters.ContainsKey('AuthStatus') -and -not [string]::IsNullOrWhiteSpace($AuthStatus)) {
@@ -120,7 +120,7 @@ if ($PSBoundParameters.ContainsKey('AuthStatus') -and -not [string]::IsNullOrWhi
         $authStatusResolved = $candidate
     } else {
         Write-Host ("WARN: ignoring invalid -AuthStatus '{0}' (allowed: pending|granted|denied|unknown)" -f $AuthStatus) -ForegroundColor Yellow
-        # if user also passed AuthGranted, keep granted; else stay pending
+        # Nếu người dùng cũng truyền AuthGranted thì giữ granted; nếu không vẫn pending.
     }
 }
 
@@ -142,7 +142,7 @@ foreach ($a in @($InScopeAssets)) {
         [void]$assets.Add($a.Trim())
     }
 }
-# Also accept host-only tokens that look like domains/IPs from TargetUrl leftovers
+# Chấp nhận cả token chỉ có host trông giống domain/IP còn sót từ TargetUrl.
 if ($assets.Count -eq 0 -and $Hint -match 'https?://([^\s/]+)') {
     [void]$assets.Add(('https://{0}/' -f $Matches[1]))
 }
@@ -151,10 +151,10 @@ $networkMode = 'offline'
 if (-not [string]::IsNullOrWhiteSpace($NetworkProfile)) {
     $networkMode = $NetworkProfile.Trim()
 } elseif ($assets.Count -gt 0 -and $authStatusResolved -eq 'granted' -and [string]::IsNullOrWhiteSpace($Sample)) {
-    # Authorized network targets default to target-only. Explicit local samples remain offline.
+    # Mục tiêu mạng được ủy quyền mặc định là target-only. Mẫu local được chỉ rõ vẫn offline.
     $networkMode = 'authorized_target_only'
 }
-# normalize common aliases
+# Chuẩn hóa các bí danh thường gặp.
 $netAliases = @{
     'lab' = 'lab_only'
     'authorized' = 'authorized_target_only'
@@ -169,9 +169,9 @@ if ($networkMode -notin $allowedNetworkModes) {
     throw "Invalid -NetworkProfile '$NetworkProfile'. Allowed: offline, lab_only, authorized_target_only, unrestricted_lab (aliases: lab, authorized, auth, offline_only)."
 }
 
-# ready_for_act requires auth granted + assets. Network targets need a non-offline
-# profile; an explicit local sample is valid in offline mode. -ReadyForAct never
-# bypasses auth or scope.
+# ready_for_act yêu cầu auth granted + assets. Mục tiêu mạng cần profile không phải
+# offline; mẫu local được chỉ rõ hợp lệ ở chế độ offline. -ReadyForAct không bao giờ
+# vượt qua ủy quyền hoặc phạm vi.
 $ready = $false
 $netAllowsAct = ($networkMode -ne 'offline' -and -not [string]::IsNullOrWhiteSpace($networkMode))
 $offlineSampleReady = ($networkMode -eq 'offline' -and -not [string]::IsNullOrWhiteSpace($Sample) -and $assets.Count -gt 0)
@@ -187,7 +187,7 @@ if ($authStatusResolved -eq 'granted' -and $assets.Count -gt 0 -and ($netAllowsA
     }
 }
 
-# Optional master-route for primary skill
+# Tùy chọn chạy master-route để chọn skill PRIMARY.
 $primary = 'reverse-engineering/SKILL.md'
 $primaryId = 'R0'
 $routeScript = Join-Path $scriptDir 'master-route.ps1'

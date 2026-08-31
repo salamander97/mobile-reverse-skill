@@ -12,7 +12,7 @@ New-Item -ItemType Directory -Path $ScratchDir -Force | Out-Null
 
 . (Join-Path $scriptDir 'lib\ToolDiscovery.ps1')
 
-# Load only the functions under test; do not execute bootstrap installation code.
+# Chỉ nạp các hàm đang kiểm thử; không chạy code cài đặt bootstrap.
 $bootstrapPath = Join-Path $scriptDir 'bootstrap-reverse.ps1'
 $tokens = $null
 $errors = $null

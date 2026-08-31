@@ -9,7 +9,7 @@
     [switch]$RunAnalysis
 )
 
-# 强制当前脚本使用 UTF-8 输出，尽量减少中文标题乱码。
+# Buộc script hiện tại xuất UTF-8 để hạn chế lỗi mã hóa tiêu đề.
 [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -28,7 +28,7 @@ function Get-RequiredToolSpec {
 
     $spec = Resolve-ReverseToolSpec -Name $Name
     if (-not $spec.Available) {
-        # Attempt auto-bootstrap
+        # Thử tự động cài đặt bổ sung.
         if (Test-Path -LiteralPath $bootstrapScript) {
             Write-Output "INFO: $Name not found, attempting auto-bootstrap..."
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $bootstrapScript -Capability @($Name) -SkipRefresh
@@ -47,7 +47,7 @@ function Write-Section {
     [string]$Title
     )
 
-    # 用固定分段标题，方便人看，也方便后续 grep。
+    # Dùng tiêu đề phân đoạn cố định để dễ đọc và dễ grep về sau.
     ""
     "=== $Title ==="
 }
@@ -58,7 +58,7 @@ if ($RunAnalysis) {
     $r2 = Get-RequiredToolSpec -Name 'r2'
 }
 
-# 将输入路径规范化成绝对路径，避免 r2/rabin2 在相对路径下歧义解析。
+# Chuẩn hóa đường dẫn đầu vào thành đường dẫn tuyệt đối để r2/rabin2 không hiểu nhầm đường dẫn tương đối.
 $resolvedPath = Resolve-Path -LiteralPath $TargetPath
 $target = $resolvedPath.Path
 

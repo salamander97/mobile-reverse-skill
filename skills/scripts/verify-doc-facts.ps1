@@ -1,11 +1,11 @@
 ﻿<#
 .SYNOPSIS
-  Verify doc fact tables (capability lists, MCP ports, Burp tool count)
-  against source-of-truth (bootstrap-manifest.json / McpHttpServer.java).
+  Kiểm tra bảng dữ kiện tài liệu (danh sách capability, cổng MCP, số công cụ Burp)
+  với nguồn sự thật (bootstrap-manifest.json / McpHttpServer.java).
 
 .DESCRIPTION
-  P1-4 guard: RULES.md / RULES_zh.md / skills/SKILL.md fact tables must not
-  drift from the manifest and the Burp extension source. Exit 1 on mismatch.
+  Cổng P1-4: bảng dữ kiện trong RULES.md / RULES_zh.md / skills/SKILL.md không được
+  lệch manifest và mã nguồn extension Burp. Thoát với mã 1 khi không khớp.
 #>
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -15,12 +15,12 @@ function Check([string]$Name, [bool]$Ok, [string]$Detail) {
   if ($Ok) { Write-Host "OK   $Name" } else { $script:fail++; Write-Host "FAIL $Name : $Detail" }
 }
 
-# --- Source of truth: manifest ---
+# --- Nguồn sự thật: manifest ---
 $manifestPath = Join-Path $Root 'skills\scripts\bootstrap-manifest.json'
 $manifest = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $capNames = @($manifest.capabilities | ForEach-Object { $_.name } | Sort-Object)
 
-# --- Source of truth: Burp getToolList() ---
+# --- Nguồn sự thật: Burp getToolList() ---
 $javaPath = Join-Path $Root 'burp-mcp-full\src\main\java\com\burpmcp\McpHttpServer.java'
 $java = Get-Content $javaPath -Raw
 $def = [regex]::Match($java, 'String\s+getToolList\s*\([^)]*\)\s*\{')
@@ -32,7 +32,7 @@ $burpCount = $burpTools.Count
 
 Write-Host "source-of-truth: $($capNames.Count) capabilities, Burp getToolList = $burpCount tools"
 
-# --- Doc helpers ---
+# --- Hàm hỗ trợ tài liệu ---
 function Get-ListLine([string]$Text, [string]$Marker) {
   $lines = $Text -split "`r?`n"
   for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -65,7 +65,7 @@ Check 'RULES_zh.md capability list' (Test-ListHasAll $zhList $capNames) "expecte
 Check 'SKILL.md capability list' (Test-ListHasAll $skList $capNames) "expected $($capNames.Count) capabilities"
 Check 'RULES_zh.md count text' ($rulesZh.Contains("共 $($capNames.Count) 项")) "expected 共 $($capNames.Count) 项"
 
-# --- MCP ports from manifest servicePort / servicePortRange ---
+# --- Cổng MCP từ servicePort / servicePortRange trong manifest ---
 foreach ($c in $manifest.capabilities) {
   if (-not $c.PSObject.Properties['servicePort']) { continue }
   $port = [string]$c.servicePort
@@ -78,7 +78,7 @@ foreach ($c in $manifest.capabilities) {
   }
 }
 
-# --- Burp tool count ---
+# --- Số lượng công cụ Burp ---
 Check 'RULES.md burp tool count' ($rulesEn.Contains("$burpCount-tool")) "expected '$burpCount-tool' in RULES.md"
 Check 'RULES_zh.md burp tool count' ($rulesZh.Contains("$burpCount 工具全控制")) "expected '$burpCount 工具全控制' in RULES_zh.md"
 

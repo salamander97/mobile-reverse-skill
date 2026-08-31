@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Client-neutral Bash entry for the structured router.
-# routing.json is the only route table; this file must not duplicate route rules.
+# Điểm vào Bash trung lập với client cho bộ định tuyến có cấu trúc.
+# routing.json là bảng định tuyến duy nhất; file này không được lặp lại các rule.
 set -euo pipefail
 
 HINT=""
@@ -44,8 +44,8 @@ if [[ ! -f "$CONFIG_PATH" ]]; then
   exit 2
 fi
 
-# Match the PowerShell entrypoint: by default, route artifacts belong to the
-# caller's current project rather than the installed reverse-skill package.
+# Đồng nhất với điểm vào PowerShell: mặc định sản phẩm định tuyến thuộc dự án
+# hiện tại của bên gọi, không thuộc gói reverse-skill đã cài.
 if [[ -z "$PROJECT_ROOT" ]]; then PROJECT_ROOT="$(pwd -P)"; fi
 if [[ -z "$OUT_DIR" ]]; then
   OUT_DIR="$PROJECT_ROOT/work/master-route-$(date +%Y%m%d-%H%M%S)"

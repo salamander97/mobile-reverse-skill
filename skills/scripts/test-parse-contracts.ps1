@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# Contract tests: route-scope parse must ignore hint text; IDA lock must not delete .i64/.idb.
+# Kiểm thử quy ước: phân tích route-scope phải bỏ qua nội dung hint; khóa IDA không được xóa .i64/.idb.
 param(
     [string]$PackageRoot = ''
 )

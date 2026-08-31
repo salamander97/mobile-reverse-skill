@@ -1,6 +1,6 @@
 ﻿#Requires -Version 5.1
-# In-repo test: drives real smoke / case-init / append-evidence entrypoints.
-# Usage:
+# Kiểm thử trong repo: chạy các điểm vào smoke / case-init / append-evidence thật.
+# Cách dùng:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/test-p0-friction.ps1
 #   powershell -File skills/scripts/test-p0-friction.ps1 -ScratchDir $env:TEMP\my-scratch
 param(
@@ -29,7 +29,7 @@ function Bad($m) { Write-Host "[FAIL] $m" -ForegroundColor Red; [void]$fail.Add(
 Write-Host "ScratchDir=$ScratchDir"
 Write-Host "PackageRoot=$PackageRoot"
 
-# 1) smoke entrypoint
+# 1) điểm vào smoke.
 $smokeLog = Join-Path $ScratchDir 'smoke.log'
 $smoke = Join-Path $scriptDir 'smoke.ps1'
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $smoke -LogDir (Join-Path $ScratchDir 'smoke-logs') -PackageRoot $PackageRoot 2>&1 |
@@ -40,7 +40,7 @@ $smokeText = Get-Content $smokeLog -Raw -Encoding UTF8
 if ($smokeText -match 'verify-routing-coherence|VERIFY_EXIT=0|ALL PASS') { Ok 'smoke log has verify/pass signal' } else { Bad 'smoke log missing verify/pass signal' }
 if ($smokeText -match 'route apk|parse master-route|parse case-init') { Ok 'smoke log has parse/route activity' } else { Bad 'smoke log missing parse/route activity' }
 
-# 2) case-init ready-to-act
+# 2) case-init ở trạng thái sẵn sàng thực hiện.
 $caseName = 'p0-ready-' + (Get-Date -Format 'HHmmss')
 $ciLog = Join-Path $ScratchDir 'case-init.log'
 $ci = Join-Path $scriptDir 'case-init.ps1'
@@ -64,7 +64,8 @@ else {
     if ($scope -match 'ready_for_act:\s*true') { Ok 'scope ready_for_act true' } else { Bad 'scope ready_for_act not true' }
 }
 
-# 2b) transition handoff is delta-by-reference: scope holds full state; timeline does not duplicate unchanged target context
+# 2b) bàn giao chuyển tiếp dùng delta-by-reference: scope giữ trạng thái đầy đủ;
+# timeline không lặp lại ngữ cảnh mục tiêu không thay đổi.
 $timelinePath = Join-Path $caseRoot 'timeline.md'
 if (-not (Test-Path $timelinePath)) { Bad "timeline.md missing at $timelinePath" }
 else {
@@ -74,7 +75,7 @@ else {
     if ($timelineText -notmatch [regex]::Escape('https://app.example.invalid/')) { Ok 'timeline does not duplicate unchanged target context' } else { Bad 'timeline duplicated target context from scope' }
 }
 
-# 3) bare case-init still pending defaults
+# 3) case-init không tham số vẫn giữ mặc định pending.
 $bareName = 'p0-bare-' + (Get-Date -Format 'HHmmss')
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $ci -CaseName $bareName -PackageRoot $PackageRoot 2>&1 | Out-Null
 $bareScope = Get-Content (Join-Path $PackageRoot ("work\{0}\scope.md" -f $bareName)) -Raw -Encoding UTF8
@@ -84,10 +85,10 @@ if ($bareScope -match 'status:\s*pending' -and $bareScope -match 'ready_for_act:
     Bad 'bare case-init defaults changed unexpectedly'
 }
 
-# 4) append-evidence
+# 4) append-evidence.
 $evCase = Join-Path $ScratchDir 'case-ev'
 New-Item -ItemType Directory -Path (Join-Path $evCase 'evidence') -Force | Out-Null
-# minimal case tree
+# Cây case tối thiểu.
 'placeholder' | Set-Content (Join-Path $evCase 'scope.md') -Encoding UTF8
 $ae = Join-Path $scriptDir 'append-evidence.ps1'
 $aeLog = Join-Path $ScratchDir 'append-evidence.log'
@@ -129,23 +130,23 @@ else {
     if ($hashedText -match '(?m)^- artifact_path:\s*evidence/fixture\.bin\s*$') { Ok 'evidence artifact path recorded' } else { Bad 'evidence artifact path missing' }
 }
 
-# 5) recon-pipeline topics present
+# 5) có đủ chủ đề recon-pipeline.
 $recon = Join-Path $skillsRoot 'pentest-tools\references\recon-pipeline.md'
 $rt = Get-Content $recon -Raw -Encoding UTF8
 foreach ($topic in @('Origin:', 'Referer:', 'eth0', 'append-evidence', 'Access-Control', 'nmap -sT')) {
-    # looser checks
+    # Kiểm tra nới lỏng.
 }
 if ($rt -match 'Origin:' -and $rt -match 'Referer:') { Ok 'recon-pipeline browser Origin/Referer' } else { Bad 'recon-pipeline missing Origin/Referer' }
 if ($rt -match 'eth0' -or $rt -match 'nmap -sT') { Ok 'recon-pipeline Windows nmap note' } else { Bad 'recon-pipeline missing nmap note' }
 if ($rt -match 'append-evidence') { Ok 'recon-pipeline Evidence append' } else { Bad 'recon-pipeline missing append-evidence' }
 
-# 7) verify alone
+# 7) chỉ chạy verify.
 $vLog = Join-Path $ScratchDir 'verify.log'
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $scriptDir 'verify-routing-coherence.ps1') 2>&1 |
     Tee-Object -FilePath $vLog | Out-Null
 if ($LASTEXITCODE -eq 0) { Ok 'verify-routing-coherence exit 0' } else { Bad "verify exit $LASTEXITCODE" }
 
-# 8) Chinese route samples (P1)
+# 8) mẫu định tuyến tiếng Trung (P1).
 $mr = Join-Path $scriptDir 'master-route.ps1'
 $zhCases = @(
     @{ Hint = '安卓 APK 加固 反编译'; Expect = 'apk-reverse' },
@@ -158,7 +159,7 @@ foreach ($zc in $zhCases) {
     else { Bad ("zh route miss {0}: {1}" -f $zc.Expect, ($raw.Substring(0, [Math]::Min(120, $raw.Length)))) }
 }
 
-# 9) case-guard: ready case exits 0; bare pending exits 2 even with -Force
+# 9) case-guard: case sẵn sàng thoát 0; case pending không tham số vẫn thoát 2 dù có -Force.
 $cg = Join-Path $scriptDir 'case-guard.ps1'
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $cg -CaseRoot $caseRoot 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) { Ok 'case-guard ready exit 0' } else { Bad "case-guard ready exit $LASTEXITCODE" }
@@ -168,10 +169,9 @@ if ($LASTEXITCODE -eq 2) { Ok 'case-guard pending exit 2' } else { Bad "case-gua
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $cg -CaseRoot $bareRoot -Force 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 2) { Ok 'case-guard -Force cannot bypass hard gate' } else { Bad "case-guard -Force expected 2 got $LASTEXITCODE" }
 
-# 10) AuthGranted must not be clobbered by junk AuthStatus / multi-asset lab init
-# Note: -ProjectRoot is passed explicitly to prevent the -InScopeAssets array
-# from being flattened by powershell -File and binding its second element to the
-# -ProjectRoot positional parameter slot.
+# 10) AuthGranted không được bị ghi đè bởi AuthStatus rác / khởi tạo lab nhiều tài sản.
+# Lưu ý: truyền rõ -ProjectRoot để ngăn mảng -InScopeAssets bị làm phẳng bởi
+# powershell -File và phần tử thứ hai bị bind nhầm vào tham số vị trí -ProjectRoot.
 $labName = 'p0-lab-' + (Get-Date -Format 'HHmmss')
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $ci `
     -Hint 'gin juice lab pentest' `
@@ -192,7 +192,7 @@ if ($labScope -match 'ready_for_act:\s*true') { Ok 'lab ready_for_act true with 
 if ($labScope -match 'mode:\s*lab_only') { Ok 'lab network lab_only' } else { Bad 'lab network wrong' }
 if ($labScope -match 'ginandjuice\.shop') { Ok 'lab in_scope has target' } else { Bad 'lab missing target asset' }
 
-# 10b) garbage AuthStatus must not override AuthGranted
+# 10b) AuthStatus rác không được ghi đè AuthGranted.
 $junkName = 'p0-junk-' + (Get-Date -Format 'HHmmss')
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $ci `
     -Hint 'web pentest lab' `
@@ -210,13 +210,13 @@ if ($junkScope -match 'status:\s*granted' -and $junkScope -notmatch 'status:\s*d
     Bad 'junk AuthStatus clobbered granted'
 }
 
-# 11) append-evidence: special-char excerpt via -File + -RawExcerptFile (real nested CLI path)
+# 11) append-evidence: excerpt có ký tự đặc biệt qua -File + -RawExcerptFile (đường CLI lồng thật).
 $ae2 = Join-Path $ScratchDir 'case-ev'
 New-Item -ItemType Directory -Path (Join-Path $ae2 'evidence') -Force | Out-Null
 'x' | Set-Content (Join-Path $ae2 'scope.md') -Encoding UTF8
 $excerptPayload = '"XML parsing error" / Entities are not allowed'
 $excerptFile = Join-Path $ScratchDir 'excerpt-payload.txt'
-# UTF-8 no BOM for portability
+# UTF-8 không BOM để portable.
 [System.IO.File]::WriteAllText($excerptFile, $excerptPayload, (New-Object System.Text.UTF8Encoding $false))
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $ae `
     -CaseRoot $ae2 `
@@ -235,7 +235,7 @@ if (Test-Path $evXml) {
     if ($ex -match '(?m)^- title:\s*Stock API error sample\s*$' -and $ex -match 'repro_command:') {
         Ok 'evidence has title+repro'
     } else { Bad 'evidence missing title/repro' }
-    # Assert specifically inside raw_excerpt block (not title)
+    # Kiểm tra đúng bên trong khối raw_excerpt, không kiểm tra tiêu đề.
     $excerptBlockOk = $false
     if ($ex -match '(?ms)^- raw_excerpt:\s*\|\r?\n(?<block>.*?)(?=\r?\n- |\z)') {
         $block = $Matches['block']
@@ -248,16 +248,16 @@ if (Test-Path $evXml) {
     if ($ex -match '(?m)^- source_type:\s*command\s*$') { Ok 'source_type remains command' } else { Bad 'source_type polluted by arg split' }
 } else { Bad 'E-XML.md not written' }
 
-# 11b) broken multi-word -RawExcerpt under -File must fail loud (not silently corrupt fields)
+# 11b) -RawExcerpt nhiều từ bị lỗi khi dùng -File phải báo lỗi rõ (không âm thầm hỏng trường).
 $ae3 = Join-Path $ScratchDir 'case-ev-broken'
 New-Item -ItemType Directory -Path (Join-Path $ae3 'evidence') -Force | Out-Null
 'x' | Set-Content (Join-Path $ae3 'scope.md') -Encoding UTF8
 $brokenLog = Join-Path $ScratchDir 'append-evidence-broken.log'
-# Intentionally unquoted multi-word after -RawExcerpt to simulate nested -File quote loss
+# Cố ý không đặt dấu nháy cho giá trị nhiều từ sau -RawExcerpt để mô phỏng mất nháy khi gọi lồng -File.
 cmd /c "`"$HostExe`" -NoProfile -ExecutionPolicy Bypass -File `"$ae`" -CaseRoot `"$ae3`" -Id E-BAD -Title `"T`" -ReproCommand `"curl -sI https://example/`" -RawExcerpt XML parsing error / Entities -Severity info -Status observed >`"$brokenLog`" 2>&1"
 if ($LASTEXITCODE -ne 0) { Ok 'broken multi-word RawExcerpt fails loud' } else { Bad 'broken multi-word RawExcerpt should not exit 0' }
 
-# 12) client-side + recon playbook topics
+# 12) chủ đề playbook phía client và recon.
 $play = Join-Path $skillsRoot 'pentest-tools\references\client-side-lab-playbook.md'
 $recon = Join-Path $skillsRoot 'pentest-tools\references\recon-pipeline.md'
 if (Test-Path $play) {
@@ -273,7 +273,7 @@ if (Test-Path $recon) {
     } else { Bad 'recon-pipeline missing topic family' }
 } else { Bad 'recon-pipeline missing' }
 
-# 13) ReadyForAct alone must NOT mark ready without auth/assets
+# 13) chỉ ReadyForAct không được đánh dấu sẵn sàng nếu thiếu auth/assets.
 $forceName = 'p0-forceonly-' + (Get-Date -Format 'HHmmss')
 & $HostExe -NoProfile -ExecutionPolicy Bypass -File $ci `
     -CaseName $forceName -PackageRoot $PackageRoot -ReadyForAct 2>&1 | Out-Null
@@ -284,7 +284,7 @@ if ($forceScope -match 'ready_for_act:\s*false' -and $forceScope -match 'status:
     Bad 'ReadyForAct alone incorrectly set ready/granted'
 }
 
-# 14) case-guard must not treat ops_refs paths as in_scope assets
+# 14) case-guard không được coi đường dẫn ops_refs là tài sản trong in_scope.
 $ghostCase = Join-Path $ScratchDir 'case-guard-ghost-asset'
 New-Item -ItemType Directory -Force -Path $ghostCase | Out-Null
 $ghostScope = @'
@@ -307,7 +307,7 @@ Set-Content (Join-Path $ghostCase 'scope.md') $ghostScope -Encoding UTF8
 if ($LASTEXITCODE -eq 2) { Ok 'case-guard rejects empty assets despite ops_refs URLs' }
 else { Bad "case-guard should fail empty assets; exit=$LASTEXITCODE" }
 
-# 14a) Auth/signoff fields outside their contract sections must not satisfy gate.
+# 14a) trường Auth/signoff nằm ngoài đúng phần quy ước không được thỏa cổng.
 $sectionCase = Join-Path $ScratchDir 'case-guard-section-scope'
 New-Item -ItemType Directory -Force -Path $sectionCase | Out-Null
 $sectionScope = @'
@@ -366,7 +366,7 @@ if ($invalidNetworkProcess.ExitCode -ne 0 -and -not (Test-Path -LiteralPath $inv
     Bad 'case-init accepted unsupported network profile or wrote a partial case'
 }
 
-# 14b) CaseName must remain a single safe directory name under work/.
+# 14b) CaseName phải luôn là một tên thư mục an toàn duy nhất dưới work/.
 $invalidCaseNames = @('..\case-escape', '../case-escape', 'case/name', 'case:name', '.. ', 'case.')
 $workRoot = Join-Path $PackageRoot 'work'
 foreach ($invalidCaseName in $invalidCaseNames) {
@@ -388,16 +388,16 @@ foreach ($invalidCaseName in $invalidCaseNames) {
     }
 }
 
-# 13) copy smoke primary log alias for harness
+# 13) sao chép bí danh log PRIMARY của smoke cho harness.
 $smokeLogs = Join-Path $ScratchDir 'smoke-logs'
 if (Test-Path (Join-Path $smokeLogs 'SUMMARY.txt')) {
     Copy-Item (Join-Path $smokeLogs 'SUMMARY.txt') (Join-Path $ScratchDir 'smoke-summary.txt') -Force
 }
 if (Test-Path $smokeLog) {
-    # already smoke.log
+    # đã là smoke.log.
 }
 
-# OPT summary
+# Tóm tắt OPT.
 $opt = @(
     "entrypoints: smoke.ps1, case-init.ps1, append-evidence.ps1, case-guard.ps1, case-review/review_case.py, master-route.ps1, verify-routing-coherence.ps1, test-p0-friction.ps1",
     "docs: recon-pipeline.md (Origin/Referer, nmap -sT/eth0, globoff, append-evidence); client-side-lab-playbook.md (innerHTML sink, agent-browser, observed vs validated, PP)",

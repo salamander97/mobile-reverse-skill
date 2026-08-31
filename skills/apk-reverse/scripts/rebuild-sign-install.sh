@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# rebuild-sign-install.sh — APK 重打包 + 签名 + 安装
-# 等价于 Windows 版的 rebuild-sign-install.ps1
+# rebuild-sign-install.sh — đóng gói lại, ký và cài đặt APK.
+# Tương đương với rebuild-sign-install.ps1 trên Windows.
 #
-# 用法:
+# Cách dùng:
 #   bash rebuild-sign-install.sh <project_dir> [--out <dir>] [--name <base>]
 #                                [--keystore <path>] [--install] [--reinstall]
 #                                [--device <serial>] [--clean]
@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KALI_BOOTSTRAP="$(cd "$SCRIPT_DIR/../../../kali/scripts" 2>/dev/null && pwd)/bootstrap-reverse.sh"
 DEFAULT_KEYSTORE="$HOME/.android/debug.keystore"
 
-# ─── 参数 ──────────────────────────────────────────────────────────────────────────
+# ─── Tham số ───────────────────────────────────────────────────────────────────────
 
 PROJECT_DIR=""
 OUT_DIR=""
@@ -56,7 +56,7 @@ if [[ -z "$PROJECT_DIR" || ! -d "$PROJECT_DIR" ]]; then
     exit 1
 fi
 
-# ─── 工具检测 ──────────────────────────────────────────────────────────────────────
+# ─── Kiểm tra công cụ ───────────────────────────────────────────────────────────────
 
 ensure_tool() {
     local name="$1"
@@ -83,7 +83,7 @@ ensure_tool "apksigner"
 ensure_tool "keytool"
 [[ "$DO_INSTALL" == "true" ]] && ensure_tool "adb"
 
-# ─── 生成 debug keystore（如果不存在） ─────────────────────────────────────────────
+# ─── Tạo debug keystore nếu chưa tồn tại ────────────────────────────────────────────
 
 if [[ ! -f "$KEYSTORE" ]]; then
     echo "INFO: 生成 debug keystore: $KEYSTORE"
@@ -96,7 +96,7 @@ if [[ ! -f "$KEYSTORE" ]]; then
         -dname "CN=Android Debug,O=ReverseSkill,C=CN"
 fi
 
-# ─── 路径计算 ──────────────────────────────────────────────────────────────────────
+# ─── Tính toán đường dẫn ────────────────────────────────────────────────────────────
 
 OUT_DIR="${OUT_DIR:-$(dirname "$PROJECT_DIR")}"
 BASE_NAME="${BASE_NAME:-$(basename "$PROJECT_DIR")}"
@@ -110,17 +110,17 @@ if [[ "$CLEAN" == "true" ]]; then
     rm -f "$UNSIGNED_APK" "$ALIGNED_APK" "$SIGNED_APK"
 fi
 
-# ─── 重打包 ───────────────────────────────────────────────────────────────────────
+# ─── Đóng gói lại ───────────────────────────────────────────────────────────────────
 
 echo "=== apktool 重打包 ==="
 apktool b "$PROJECT_DIR" -o "$UNSIGNED_APK"
 
-# ─── 对齐 ─────────────────────────────────────────────────────────────────────────
+# ─── Căn chỉnh ──────────────────────────────────────────────────────────────────────
 
 echo "=== zipalign 对齐 ==="
 zipalign -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
 
-# ─── 签名 ─────────────────────────────────────────────────────────────────────────
+# ─── Ký ─────────────────────────────────────────────────────────────────────────────
 
 echo "=== apksigner 签名 ==="
 apksigner sign \
@@ -131,7 +131,7 @@ apksigner sign \
     --out "$SIGNED_APK" \
     "$ALIGNED_APK"
 
-# ─── 验证 ─────────────────────────────────────────────────────────────────────────
+# ─── Xác minh ───────────────────────────────────────────────────────────────────────
 
 echo "=== 验证签名 ==="
 apksigner verify --print-certs "$SIGNED_APK"
@@ -145,7 +145,7 @@ echo "  aligned_apk=$ALIGNED_APK"
 echo "  signed_apk=$SIGNED_APK"
 echo "  keystore=$KEYSTORE"
 
-# ─── 安装 ─────────────────────────────────────────────────────────────────────────
+# ─── Cài đặt ────────────────────────────────────────────────────────────────────────
 
 if [[ "$DO_INSTALL" == "true" ]]; then
     echo "=== adb 安装 ==="

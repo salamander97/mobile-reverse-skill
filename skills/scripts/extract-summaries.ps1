@@ -1,9 +1,9 @@
 ﻿#Requires -Version 5.1
-# 生成 skills/INDEX.md：从各模块 SKILL.md 的 frontmatter 提取 name+description，生成导航索引。
-# 幂等：重复运行输出一致（CI 用 git diff 校验防 drift）。
-# 用法：
+# Tạo skills/INDEX.md: trích xuất name và description từ frontmatter của từng SKILL.md để tạo chỉ mục.
+# Có tính lặp an toàn: chạy lại cho cùng kết quả (CI dùng git diff để phát hiện lệch).
+# Cách dùng:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/extract-summaries.ps1
-#   powershell -File skills/scripts/extract-summaries.ps1 -Check   # 只校验不写（CI 模式，不一致 exit 1）
+#   powershell -File skills/scripts/extract-summaries.ps1 -Check   # chỉ kiểm tra, không ghi (chế độ CI, lệch thì exit 1)
 param(
     [switch] $Check
 )
@@ -14,7 +14,7 @@ if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.P
 $skillsRoot = Split-Path -Parent $scriptDir
 $indexPath = Join-Path $skillsRoot 'INDEX.md'
 
-# 扫描版本库中的模块 SKILL.md（排除本地 ignored/private trees，保证 clean clone 与开发机幂等）。
+# Quét SKILL.md của các module trong repo (loại cây ignored/private để clone sạch và máy phát triển cho cùng kết quả).
 $skipDirs = @('ops', 'scripts', 'config', 'tests', 'field-journal', 'references')
 $packageRoot = Split-Path -Parent $skillsRoot
 $trackedSkillFiles = @()
@@ -41,13 +41,13 @@ $skillFiles = $candidateSkillFiles | Where-Object {
 $rows = New-Object System.Collections.ArrayList
 foreach ($sf in $skillFiles) {
     $rel = $sf.FullName.Substring($skillsRoot.Length + 1)
-    # 兼容 Windows（\）与 Linux/macOS（/）两种路径分隔符
+    # Tương thích cả dấu phân cách đường dẫn Windows (\) và Linux/macOS (/).
     $dir = $rel.Split(@('\', '/'))[0]
     $head = Get-Content -LiteralPath $sf.FullName -TotalCount 15 -Encoding UTF8
     $name = ''; $desc = ''; $blockMode = $false; $inFm = $false
     foreach ($line in $head) {
         if ($line -match '^---') {
-            if ($inFm) { break }   # 第二个 --- 结束 frontmatter
+            if ($inFm) { break }   # Dấu --- thứ hai kết thúc frontmatter.
             $inFm = $true; continue
         }
         if (-not $inFm) { continue }
@@ -55,7 +55,7 @@ foreach ($sf in $skillFiles) {
         if ($line -match '^description:\s*\|') { $blockMode = $true; continue }
         if ($line -match '^description:\s*(.+)$') { $desc = $Matches[1].Trim(); continue }
         if ($blockMode) {
-            # YAML 块：缩进的文本行拼接（取首行，超长截断）
+            # Khối YAML: ghép các dòng văn bản thụt vào (lấy dòng đầu, cắt nếu quá dài).
             if ($line -match '^\s{2,}(.+)$') {
                 if (-not $desc) { $desc = $Matches[1].Trim() }
             } elseif ($line -match '^\S') { $blockMode = $false }
@@ -101,7 +101,7 @@ foreach ($r in $rows) {
 [void]$sb.AppendLine('歧义场景读 `skills/routing.md` 全矩阵；CTF 多类型任务走 `CTF-Sandbox-Orchestrator/`。')
 
 $newContent = $sb.ToString()
-# 统一 LF 行尾：与 .gitattributes (*.md eol=lf) 保持一致，保证 clone 后 -Check 幂等
+# Chuẩn hóa kết thúc dòng LF để đồng nhất với .gitattributes (*.md eol=lf), bảo đảm -Check ổn định sau clone.
 $newContent = $newContent -replace "`r`n", "`n"
 $utf8 = New-Object System.Text.UTF8Encoding $true
 
@@ -110,7 +110,7 @@ if ($Check) {
         Write-Host '[CHECK] INDEX.md missing' -ForegroundColor Red
         exit 1
     }
-    # 行尾免疫：autocrlf=true 的机器上 worktree 可能是 CRLF，normalize 后再比
+    # Miễn nhiễm kết thúc dòng: worktree trên máy có autocrlf=true có thể là CRLF; chuẩn hóa trước khi so sánh.
     $old = ([System.IO.File]::ReadAllText($indexPath)) -replace "`r`n", "`n"
     if ($old -eq $newContent) {
         Write-Host '[CHECK] INDEX.md up to date' -ForegroundColor Green

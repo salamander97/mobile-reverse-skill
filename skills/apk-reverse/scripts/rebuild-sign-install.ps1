@@ -72,7 +72,7 @@ function Get-ToolPath {
         }
     }
 
-    # Attempt auto-bootstrap for supported tools
+    # Thử tự động cài đặt bổ sung các công cụ được hỗ trợ.
     $bootstrapScript = Join-Path $PSScriptRoot '..\..\scripts\bootstrap-reverse.ps1'
     $bootstrapSupported = @('adb', 'apktool')
     if ($Name -in $bootstrapSupported -and (Test-Path -LiteralPath $bootstrapScript)) {
@@ -83,7 +83,7 @@ function Get-ToolPath {
             Write-Host "INFO: $Name bootstrapped successfully." -ForegroundColor Green
             return $cmd.Source
         }
-        # Re-check fallbacks after bootstrap
+        # Kiểm tra lại các đường dẫn dự phòng sau khi cài đặt bổ sung.
         if ($fallbacks.Contains($Name)) {
             foreach ($candidate in $fallbacks[$Name]) {
                 if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate)) {
@@ -94,7 +94,7 @@ function Get-ToolPath {
         }
     }
 
-    # Clear error message for tools that cannot be auto-bootstrapped
+    # Tạo thông báo lỗi rõ ràng cho các công cụ không thể tự động cài đặt bổ sung.
     $manualHint = switch ($Name) {
         'zipalign'  { 'Install Android Build-Tools via Android SDK Manager (sdkmanager "build-tools;35.0.0")' }
         'apksigner' { 'Install Android Build-Tools via Android SDK Manager (sdkmanager "build-tools;35.0.0")' }

@@ -69,33 +69,33 @@
 
 ## 2. 分析目标
 
-<!-- 本次逆向要回答的核心问题 -->
+<!-- Câu hỏi cốt lõi mà lần phân tích ngược này cần trả lời -->
 
 ## 3. 静态分析
 
 ### 3.1 基本信息
-<!-- 架构、编译器、保护机制、字符串特征 -->
+<!-- Kiến trúc, trình biên dịch, cơ chế bảo vệ, đặc điểm chuỗi -->
 
 ### 3.1.1 导入表 / 依赖（二进制 MUST）
-<!-- 写入 E-imports / E-triage-imports 摘要；失败也要记 Evidence，禁止跳过 -->
+<!-- Ghi tóm tắt E-imports / E-triage-imports; thất bại cũng phải ghi Evidence, không được bỏ qua -->
 
 ### 3.2 关键函数/类
-<!-- 列出定位到的关键逻辑，附代码片段 -->
+<!-- Liệt kê logic chính đã định vị, kèm đoạn mã -->
 
 ### 3.3 加密/签名算法
-<!-- 如果涉及加密，说明算法、密钥来源、参数构造 -->
+<!-- Nếu có mã hóa, nêu thuật toán, nguồn khóa và cách tạo tham số -->
 
 ## 4. 动态分析
 
 ### 4.1 Hook 记录
-<!-- Frida / xposed / 其他 hook 的目标和结果 -->
+<!-- Mục tiêu và kết quả của Frida / xposed / hook khác -->
 
 ### 4.2 运行时行为
-<!-- 网络请求、文件操作、进程行为 -->
+<!-- Request mạng, thao tác file và hành vi tiến trình -->
 
 ## 5. 核心发现
 
-<!-- 用编号列出关键结论 -->
+<!-- Liệt kê kết luận chính theo số thứ tự -->
 
 1. ...
 2. ...
@@ -103,7 +103,7 @@
 
 ## 6. 复现步骤
 
-<!-- 让其他人能重现你的分析结果 -->
+<!-- Để người khác có thể tái hiện kết quả phân tích -->
 
 ```bash
 # 关键命令
@@ -111,11 +111,11 @@
 
 ## 7. 遗留问题
 
-<!-- 没有完全解决的点 -->
+<!-- Các điểm chưa giải quyết hoàn toàn -->
 
 ## 8. 附件
 
-<!-- hook 脚本、解密代码、截图等 -->
+<!-- Hook script, code giải mã, ảnh chụp màn hình và các tài liệu khác -->
 ```
 
 ---
@@ -151,7 +151,7 @@
 
 ## 1. 执行摘要
 
-<!-- 一段话总结：测试了什么、发现了什么、风险等级 -->
+<!-- Tóm tắt một đoạn: đã kiểm thử gì, phát hiện gì và mức rủi ro -->
 
 ## 2. 测试范围
 
@@ -187,14 +187,14 @@
 **证据**：
 
 ```
-<!-- 请求/响应/截图/payload -->
+<!-- Request/response/ảnh chụp/payload -->
 ```
 
 **修复建议**：
 
 ## 5. 攻击路径
 
-<!-- 如果有完整攻击链，画出路径 -->
+<!-- Nếu có chuỗi tấn công đầy đủ, vẽ đường đi -->
 
 ```
 入口 → 信息收集 → 漏洞利用 → 权限提升 → 目标达成
@@ -216,7 +216,7 @@
 
 ## 8. 附录
 
-<!-- 完整 payload、脚本、配置文件等 -->
+<!-- Payload đầy đủ, script, file cấu hình và các tài liệu khác -->
 ```
 
 ---
@@ -233,18 +233,18 @@
 
 ## 题目描述
 
-<!-- 原题描述 -->
+<!-- Mô tả đề bài gốc -->
 
 ## 解题思路
 
 ### 第一步：信息收集
-<!-- 观察到了什么 -->
+<!-- Đã quan sát thấy gì -->
 
 ### 第二步：漏洞/突破口
-<!-- 找到了什么关键点 -->
+<!-- Đã tìm thấy điểm chính nào -->
 
 ### 第三步：利用
-<!-- 怎么利用的 -->
+<!-- Đã khai thác hoặc tái hiện như thế nào -->
 
 ## 关键代码/Payload
 
@@ -260,11 +260,11 @@ flag{...}
 
 ## 踩坑记录
 
-<!-- 走过的弯路 -->
+<!-- Những đường vòng đã thử -->
 
 ## 知识点
 
-<!-- 这道题涉及的知识点，方便后续复习 -->
+<!-- Kiến thức liên quan để tiện ôn tập sau này -->
 ```
 
 ---
@@ -290,21 +290,21 @@ param1=xxx&sign=<目标字段>
 ## 2. 定位过程
 
 ### 2.1 断点/Hook 方式
-<!-- 怎么找到签名生成位置的 -->
+<!-- Đã tìm vị trí tạo chữ ký như thế nào -->
 
 ### 2.2 调用栈
-<!-- 关键调用链 -->
+<!-- Chuỗi gọi chính -->
 
 ## 3. 算法还原
 
 ### 3.1 算法类型
-<!-- HMAC-SHA256 / AES / 自定义 / ... -->
+<!-- HMAC-SHA256 / AES / tự định nghĩa / ... -->
 
 ### 3.2 参数构造
-<!-- 哪些字段参与签名、排序规则、分隔符 -->
+<!-- Trường nào tham gia ký, quy tắc sắp xếp và dấu phân cách -->
 
 ### 3.3 密钥来源
-<!-- 硬编码 / 接口返回 / 时间戳派生 / ... -->
+<!-- Hard-code / response API / suy ra từ timestamp / ... -->
 
 ## 4. 本地复现代码
 
@@ -314,11 +314,11 @@ param1=xxx&sign=<目标字段>
 
 ## 5. 验证结果
 
-<!-- 用复现代码生成的签名与实际请求对比 -->
+<!-- So sánh chữ ký do code tái hiện tạo ra với request thực tế -->
 
 ## 6. 反爬/风控注意事项
 
-<!-- 频率限制、设备指纹、环境检测等 -->
+<!-- Giới hạn tần suất, dấu vân tay thiết bị, kiểm tra môi trường và các yếu tố khác -->
 ```
 
 ---

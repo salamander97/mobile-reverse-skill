@@ -1,4 +1,4 @@
-# Shared IDA open lock policy. Never delete .i64/.idb.
+# Chính sách khóa mở IDA dùng chung. Không bao giờ xóa .i64/.idb.
 function Get-IdaOpenLockPlan {
     [CmdletBinding()]
     param(

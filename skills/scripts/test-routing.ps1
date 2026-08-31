@@ -1,10 +1,10 @@
 ﻿#Requires -Version 5.1
-# reverse-skill 路由回归测试器：跑 routing-benchmark.json 全部用例，比对 PRIMARY 期望。
-# 用法：
+# Bộ kiểm thử hồi quy định tuyến reverse-skill: chạy toàn bộ case trong routing-benchmark.json và so với PRIMARY mong đợi.
+# Cách dùng:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/test-routing.ps1
-#   powershell -File skills/scripts/test-routing.ps1 -Quick          # 只跑 quick 最小回归集
+#   powershell -File skills/scripts/test-routing.ps1 -Quick          # chỉ chạy tập hồi quy nhanh tối thiểu
 #   powershell -File skills/scripts/test-routing.ps1 -Benchmark <path> -LogDir <dir>
-# 退出码：0 全绿 / 1 有用例失败（failures 详情写入 LogDir）
+# Mã thoát: 0 là toàn bộ đạt / 1 có case thất bại (chi tiết failures ghi vào LogDir).
 param(
     [string] $Benchmark = '',
     [switch] $Quick,
@@ -31,7 +31,7 @@ if (-not (Test-Path -LiteralPath $Benchmark)) {
 }
 $bm = Get-Content -LiteralPath $Benchmark -Raw -Encoding UTF8 | ConvertFrom-Json
 
-# $env:TEMP 在 Linux/macOS runner 上可能未设置，统一用 GetTempPath fallback
+# $env:TEMP có thể chưa được đặt trên runner Linux/macOS; dùng GetTempPath làm dự phòng thống nhất.
 $tmpBase = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
 
 if ([string]::IsNullOrWhiteSpace($LogDir)) {

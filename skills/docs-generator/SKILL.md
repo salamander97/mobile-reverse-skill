@@ -105,11 +105,11 @@ Reveal information in layers:
 ### 2. Task-Oriented Writing
 
 ```markdown
-<!-- Bad: Feature-oriented -->
+<!-- Không nên: định hướng theo tính năng -->
 ## AuthService Class
 The AuthService class provides authentication methods...
 
-<!-- Good: Task-oriented -->
+<!-- Nên dùng: định hướng theo tác vụ -->
 ## Authenticating Users
 To authenticate a user, call login() with credentials:
 ```

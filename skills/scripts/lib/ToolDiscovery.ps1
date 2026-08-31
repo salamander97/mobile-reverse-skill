@@ -884,7 +884,7 @@ function Get-ReverseCapabilityState {
     $mcpHttpVerified = $false
     if ($definition.PSObject.Properties['servicePort'] -and $definition.servicePort) {
         $serviceOnline = Test-ReverseTcpPort -Port ([int]$definition.servicePort)
-        # If TCP passes, attempt HTTP MCP protocol-level handshake for higher confidence
+        # Nếu TCP đạt, thử bắt tay ở cấp giao thức HTTP MCP để tăng độ tin cậy.
         if ($serviceOnline) {
             $mcpHttpVerified = Test-ReverseMcpHttp -Port ([int]$definition.servicePort)
         }

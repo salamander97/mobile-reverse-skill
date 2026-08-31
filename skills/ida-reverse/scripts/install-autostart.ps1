@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
-Register a keep-alive scheduled task for IDA Pro MCP HTTP.
+Đăng ký tác vụ đã lên lịch để giữ HTTP MCP của IDA Pro hoạt động.
 
 .DESCRIPTION
-Replaces the old logon-only reverse-skill-ida-mcp task with:
-- At logon + 30s delay
-- Once-from-now trigger repeating every 1 minute for 3650 days
-  (this host cannot write -Daily.Repetition)
-- Restart the task up to 3 times if the script itself fails
-- Action runs watchdog.ps1 (reuse if healthy, start only if down;
-  never kill ida.exe when the GUI plugin owns 13337)
+Các thiết lập của tác vụ reverse-skill-ida-mcp:
+- Chạy khi đăng nhập, trễ 30 giây.
+- Kích hoạt từ thời điểm hiện tại và lặp mỗi phút trong 3650 ngày
+  (máy này không ghi được -Daily.Repetition).
+- Khởi động lại tối đa 3 lần nếu chính script bị lỗi.
+- Chạy watchdog.ps1 (dùng lại khi khỏe, chỉ khởi động khi tắt;
+  không bao giờ kill ida.exe khi plugin giao diện đang giữ cổng 13337).
 
-Usage:
+Cách dùng:
   powershell -File install-autostart.ps1
   powershell -File install-autostart.ps1 -Unregister
 #>
@@ -44,7 +44,7 @@ $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arg -Work
 $logon = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $logon.Delay = 'PT30S'
 
-# -Daily.Repetition is not writable on this host; -Once + long duration is.
+# -Daily.Repetition không ghi được trên host này; dùng -Once với thời lượng dài.
 $repeat = New-ScheduledTaskTrigger -Once -At (Get-Date) `
     -RepetitionInterval (New-TimeSpan -Minutes 1) `
     -RepetitionDuration (New-TimeSpan -Days 3650)

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Lightweight scope gate before ACT. Exit 0=ok, 2=not ready, 1=usage/error.
-# Usage:
+# Cổng kiểm tra phạm vi nhẹ trước ACT. Mã thoát 0=đạt, 2=chưa sẵn sàng, 1=sai cách dùng/lỗi.
+# Cách dùng:
 #   bash skills/scripts/case-guard.sh --case-root work/my-case
-#   bash skills/scripts/case-guard.sh --case-root work/my-case --force  # compatibility flag; never bypasses scope hard gates
+#   bash skills/scripts/case-guard.sh --case-root work/my-case --force  # cờ tương thích; không bao giờ vượt cổng phạm vi bắt buộc
 set -euo pipefail
 
 CASE_ROOT=""
@@ -39,8 +39,8 @@ fi
 SCOPE="$(cat "$SCOPE_PATH")"
 ISSUES=()
 
-# Read fields only from their contract sections. A status-like line in notes,
-# evidence, or ops_refs must never satisfy the authorization gate.
+# Chỉ đọc trường trong đúng phần quy ước. Dòng giống trạng thái trong notes,
+# evidence hoặc ops_refs không bao giờ được thỏa cổng ủy quyền.
 section_field() {
   local section="$1"
   local field="$2"
@@ -86,7 +86,7 @@ else
 fi
 
 has_asset=0
-# crude: look for indented list items after assets: that are not []
+    # Cách kiểm tra đơn giản: tìm mục danh sách thụt vào sau assets và không phải [].
 if printf '%s\n' "$SCOPE" | awk '
   BEGIN{inscope=0; inassets=0}
   /^##[[:space:]]*in_scope/ {inscope=1; inassets=0; next}

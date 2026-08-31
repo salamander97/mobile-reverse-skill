@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# recon.sh — radare2 快速侦察（二进制基本信息、节区、导入导出、字符串）
-# 等价于 Windows 版的 recon.ps1
+# recon.sh — trinh sát nhanh bằng radare2 (thông tin nhị phân, section, import/export, chuỗi).
+# Tương đương với recon.ps1 trên Windows.
 #
-# 用法:
+# Cách dùng:
 #   bash recon.sh <target_file> [--strings-limit 40] [--imports-limit 80] [--analyze]
 
 set -euo pipefail
@@ -10,7 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KALI_BOOTSTRAP="$(cd "$SCRIPT_DIR/../../../kali/scripts" 2>/dev/null && pwd)/bootstrap-reverse.sh"
 
-# ─── 参数 ──────────────────────────────────────────────────────────────────────────
+# ─── Tham số ───────────────────────────────────────────────────────────────────────
 
 TARGET=""
 STRINGS_LIMIT=40
@@ -37,7 +37,7 @@ if [[ ! -f "$TARGET" ]]; then
     exit 1
 fi
 
-# ─── 工具检测 ──────────────────────────────────────────────────────────────────────
+# ─── Kiểm tra công cụ ───────────────────────────────────────────────────────────────
 
 ensure_tool() {
     local name="$1"
@@ -57,12 +57,12 @@ ensure_tool() {
 ensure_tool "rabin2"
 [[ "$RUN_ANALYSIS" == "true" ]] && ensure_tool "r2"
 
-# ─── 绝对路径 ──────────────────────────────────────────────────────────────────────
+# ─── Đường dẫn tuyệt đối ────────────────────────────────────────────────────────────
 
 TARGET="$(realpath "$TARGET")"
 echo "目标文件: $TARGET"
 
-# ─── 侦察 ─────────────────────────────────────────────────────────────────────────
+# ─── Trinh sát ──────────────────────────────────────────────────────────────────────
 
 echo ""
 echo "=== 基本信息 ==="

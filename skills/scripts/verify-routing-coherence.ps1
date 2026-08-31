@@ -1,5 +1,5 @@
 ﻿#Requires -Version 5.1
-# reverse-skill routing + ops contract gates (skill-router only; no host platform runtime)
+# Các cổng quy ước vận hành và định tuyến reverse-skill (chỉ skill-router; không chạy runtime của host).
 param([string] $ScratchDir = '')
 $ErrorActionPreference = 'Stop'
 
@@ -24,7 +24,7 @@ $fail = New-Object System.Collections.Generic.List[string]
 function Ok($m) { Write-Host "[OK] $m" -ForegroundColor Green }
 function Bad($m) { Write-Host "[FAIL] $m" -ForegroundColor Red; [void]$fail.Add($m) }
 
-# --- 新事实源/产物检查（routing.json / benchmark / INDEX） ---
+# --- Kiểm tra nguồn sự thật/sản phẩm mới (routing.json / benchmark / INDEX) ---
 $routingJson = Join-Path $skillsRoot 'config/routing.json'
 if (Test-Path -LiteralPath $routingJson) {
     $rj = Get-Content -LiteralPath $routingJson -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -71,7 +71,7 @@ if (Test-Path -LiteralPath $benchJson) {
     if ($bjCases.Count -ge 100) { Ok "benchmark cases=$($bjCases.Count)" } else { Bad "benchmark cases < 100 ($($bjCases.Count))" }
     $badExpect = @($bjCases | Where-Object { $_.expect -notmatch '^R\d+$' })
     if ($badExpect.Count -eq 0) { Ok 'benchmark expect ids well-formed' } else { Bad "benchmark bad expect: $($badExpect.Count)" }
-    # benchmark expect 必须存在于 routing.json（防 benchmark 引用已删除的路由）
+    # expect trong benchmark phải tồn tại ở routing.json (ngăn benchmark gọi route đã xóa).
     if (Test-Path -LiteralPath $routingJson) {
         $rjIds = @($rjRoutes | ForEach-Object { $_.Name })
         $ghostExpect = @($bjCases | Where-Object { $_.expect -notin $rjIds })
@@ -83,7 +83,7 @@ if (Test-Path -LiteralPath $benchJson) {
 
 if (Test-Path -LiteralPath (Join-Path $skillsRoot 'INDEX.md')) { Ok 'INDEX.md present (generated)' } else { Bad 'INDEX.md missing (run extract-summaries.ps1)' }
 
-# master-route.ps1 不得回退到硬编码路由表（防绕过 routing.json）
+# master-route.ps1 không được quay về bảng định tuyến hard-code (ngăn bỏ qua routing.json).
 $mrText = Get-Content -LiteralPath (Join-Path $scriptDir 'master-route.ps1') -Raw -Encoding UTF8
 if ($mrText -match '\$map\s*=\s*\[ordered\]' -or $mrText -match "R1'\s*=\s*'apk-reverse") {
     Bad 'master-route.ps1 contains hardcoded routing table (must read routing.json)'
@@ -91,7 +91,7 @@ if ($mrText -match '\$map\s*=\s*\[ordered\]' -or $mrText -match "R1'\s*=\s*'apk-
     Ok 'master-route.ps1 has no hardcoded routing table'
 }
 
-# --- ops artifacts exist ---
+# --- Kiểm tra sản phẩm vận hành tồn tại ---
 $opsFiles = @(
     'ops/IDENTITY.md',
     'ops/scope-contract.md',
@@ -130,7 +130,7 @@ foreach ($rel in $opsFiles) {
 }
 $indexLines | Set-Content -LiteralPath (Join-Path $ScratchDir 'artifacts-index.txt') -Encoding UTF8
 
-# --- links from hubs (skills + RULES single source) ---
+# --- Kiểm tra liên kết từ các hub (skills + nguồn duy nhất RULES) ---
 foreach ($hub in @('MASTER-ROUTING.md', 'SKILL.md', 'routing.md')) {
     $t = Get-Content (Join-Path $skillsRoot $hub) -Raw -Encoding UTF8
     if ($t -match 'ops/scope-contract|ops\\scope-contract|case-init') { Ok "hub link scope in $hub" }
@@ -138,7 +138,7 @@ foreach ($hub in @('MASTER-ROUTING.md', 'SKILL.md', 'routing.md')) {
     if ($t -match 'ops/IDENTITY|IDENTITY\.md') { Ok "hub identity $hub" }
     else { Bad "hub $hub missing IDENTITY" }
 }
-# research deposits must be reachable from hubs
+# Các kho nghiên cứu phải có thể truy cập từ các hub.
 $hubAll = ''
 foreach ($hub in @('MASTER-ROUTING.md', 'SKILL.md', 'ops/README.md', 'routing.md')) {
     $hp = Join-Path $skillsRoot $hub
@@ -149,7 +149,7 @@ foreach ($n in @('community-security-skills', 'skill-supply-chain', 're-agent-wo
     else { Bad "hub missing surface for $n" }
 }
 
-# RULES.md / RULES_zh.md MUST gate case-init/scope before ACT (injection + CRITICAL + chain)
+# RULES.md / RULES_zh.md BẮT BUỘC chặn case-init/scope trước ACT (tiêm + CRITICAL + chuỗi).
 $rulesEn = Join-Path $packageRoot 'RULES.md'
 $rulesZh = Join-Path $packageRoot 'RULES_zh.md'
 foreach ($rp in @($rulesEn, $rulesZh)) {
@@ -161,13 +161,13 @@ foreach ($rp in @($rulesEn, $rulesZh)) {
     } else {
         Bad "$name missing case-init/scope/network_profile gate"
     }
-    # Compact or CRITICAL must not jump routing→ACT without scope
+    # Tác vụ Compact hoặc CRITICAL không được nhảy từ routing→ACT khi thiếu scope.
     if ($rt -match 'auth\.status\s*=\s*granted|auth.status=granted|未就绪禁止|MUST NOT ACT against targets|禁止对目标 ACT') {
         Ok "$name has auth hard gate language"
     } else {
         Bad "$name missing auth hard-gate language"
     }
-    # Post-trigger / 行为链: case-init before ACT pattern
+    # Sau trigger / chuỗi hành vi: kiểm tra mẫu case-init trước ACT.
     if ($rt -match '(?s)case-init.{0,400}ACT|scope\.md.{0,400}ACT|scope-contract.{0,400}ACT') {
         Ok "$name orders scope before ACT (nearby)"
     } else {
@@ -175,7 +175,7 @@ foreach ($rp in @($rulesEn, $rulesZh)) {
     }
 }
 
-# --- template required headings ---
+# --- Các tiêu đề bắt buộc của template ---
 $fieldLog = New-Object System.Collections.Generic.List[string]
 function Assert-Fields([string]$path, [string[]]$needles) {
     $t = Get-Content $path -Raw -Encoding UTF8
@@ -228,7 +228,7 @@ Assert-Fields (Join-Path $skillsRoot 'apk-reverse/SKILL.md') @('E-android-hidden
 Assert-Fields (Join-Path $skillsRoot 'reverse-engineering/kernel-driver-reverse.md') @('E-driver-irp-handlers', 'E-driver-ioctl', 'E-driver-byovd')
 Assert-Fields (Join-Path $skillsRoot 'docs-generator/references/security-report-templates.md') @('thin `vuln`', '1c. 漏洞技术分析')
 if ($vendorRulesText -match '(?m)vuln.*默认全文' -or $vendorRulesText -match '第 3 个默认全文 flavor') {
-    # presence of explicit "not third default" language is OK; flag only if it claims vuln IS a third default full flavor
+    # Có câu khẳng định rõ "không phải flavor mặc định thứ ba" là hợp lệ; chỉ đánh dấu nếu nói vuln LÀ flavor đầy đủ mặc định thứ ba.
 }
 if ($vendorRulesText -match '仅 2 个厂商全文 flavor' -or $vendorRulesText -match '不是.*第 3 个默认全文 flavor') {
     Ok 'vendor rules keep vuln as thin overlay not third default flavor'
@@ -237,13 +237,13 @@ if ($vendorRulesText -match '仅 2 个厂商全文 flavor' -or $vendorRulesText 
 }
 $fieldLog | Set-Content -LiteralPath (Join-Path $ScratchDir 'template-fields.txt') -Encoding UTF8
 
-# --- role map skills exist for primary rows ---
+# --- Kiểm tra skill trong role map tồn tại cho các dòng PRIMARY ---
 $roleDoc = Get-Content (Join-Path $skillsRoot 'ops/role-map.md') -Raw -Encoding UTF8
 foreach ($sk in @('attack-chain', 'pentest-tools', 'ida-reverse', 'docs-generator', 'llm-security')) {
     if ($roleDoc -match [regex]::Escape($sk)) { Ok "role-map mentions $sk" } else { Bad "role-map missing $sk" }
 }
 
-# --- master-route cases ---
+# --- Các case của master-route ---
 $cases = @(
     @{ N = 'dsl'; H = 'dsl vm reverse fireye'; Id = 'R4'; Sub = 'reverse-engineering/dsl-vm-reverse/SKILL.md' },
     @{ N = 'apk'; H = 'apk jadx smali reverse'; Id = 'R1'; Sub = 'apk-reverse/SKILL.md' },
@@ -282,12 +282,12 @@ foreach ($c in $cases) {
     if (-not (Test-Path $abs)) { Bad "missing $($c.Sub)" } else { Ok "exists $($c.Sub)" }
 }
 
-# default outdir under work
+# outdir mặc định phải nằm dưới work.
 $def = & $HostExe -NoProfile -ExecutionPolicy Bypass -File $masterRoute -Hint 'radare2 analyze' 2>&1 | Out-String
 $def | Set-Content (Join-Path $ScratchDir 'default-out.txt') -Encoding UTF8
 if ($def -match 'work[\\/]master-route-') { Ok 'default OutDir under work/' } else { Bad 'default OutDir not under work/' }
 
-# project-root output must stay with the analysis project when the skill is invoked elsewhere
+# output của project-root phải ở lại dự án phân tích khi skill được gọi từ nơi khác.
 $projectRoot = Join-Path $ScratchDir 'analysis-project'
 New-Item -ItemType Directory -Force -Path $projectRoot | Out-Null
 $projectRoute = & $HostExe -NoProfile -ExecutionPolicy Bypass -File $masterRoute `
@@ -318,7 +318,7 @@ if ($defaultProjectRoutes.Count -eq 1 -and (Test-Path (Join-Path $defaultProject
     Bad 'default route artifacts did not follow the caller project'
 }
 
-# case-init real path
+# Đường dẫn thật của case-init.
 $caseName = 'verify-ops-' + (Get-Date -Format 'HHmmss')
 $ci = & $HostExe -NoProfile -ExecutionPolicy Bypass -File $caseInit -Hint 'apk jadx reverse' -CaseName $caseName -PackageRoot $packageRoot 2>&1 | Out-String
 $ci | Set-Content (Join-Path $ScratchDir 'case-init.txt') -Encoding UTF8
@@ -364,7 +364,7 @@ if ((Test-Path (Join-Path $defaultCaseRoot 'scope.md')) -and
     Bad 'default case artifacts did not follow the caller project'
 }
 
-# ghost dsl
+# DSL không còn tồn tại.
 foreach ($rel in @('SKILL.md', 'routing.md', 'MASTER-ROUTING.md', 'scripts\master-route.ps1')) {
     $p = Join-Path $skillsRoot $rel
     if (-not (Test-Path $p)) { continue }
@@ -375,12 +375,12 @@ foreach ($rel in @('SKILL.md', 'routing.md', 'MASTER-ROUTING.md', 'scripts\maste
 }
 Ok 'ghost dsl scan done'
 
-# refresh-tool-index parses
+# Kiểm tra refresh-tool-index có thể được phân tích.
 $e = $null
 [void][System.Management.Automation.Language.Parser]::ParseFile((Join-Path $scriptDir 'refresh-tool-index.ps1'), [ref]$null, [ref]$e)
 if ($e -and $e.Count -gt 0) { Bad ("refresh-tool-index parse: {0}" -f $e[0]) } else { Ok 'refresh-tool-index parses' }
 
-# --- bootstrap-manifest parity (skills vs kali) ---
+# --- Đồng nhất bootstrap-manifest (skills với kali) ---
 $skillsManifest = Join-Path $scriptDir 'bootstrap-manifest.json'
 $kaliManifest = Join-Path $packageRoot 'kali/scripts/bootstrap-manifest.json'
 $skillsCaps = @()
@@ -404,10 +404,10 @@ if (Test-Path -LiteralPath $kaliManifest) {
     Bad 'kali bootstrap-manifest.json missing'
 }
 
-# --- supply-chain pin gate: auto-install download sources MUST be pinned ---
-# 统一判定：pinnedVersion / pinnedCommit / pinPolicy 三选一；
-# github-release-* 额外接受 assetSha256 / preferApiDigest（GitHub 官方发布资产哈希）。
-# local-http-mcp 只有在不获取外部源码时才可免 pin。
+# --- Cổng ghim chuỗi cung ứng: nguồn tải tự cài BẮT BUỘC phải được ghim ---
+# Cách xác định thống nhất: chọn một trong pinnedVersion / pinnedCommit / pinPolicy.
+# github-release-* còn chấp nhận assetSha256 / preferApiDigest (hash asset phát hành chính thức của GitHub).
+# local-http-mcp chỉ được miễn ghim khi không lấy mã nguồn bên ngoài.
 $pinKinds = @('pip-package', 'npm-mcp', 'npm-global', 'go-install', 'git-clone')
 foreach ($mf in @($skillsManifest, $kaliManifest)) {
     if (-not (Test-Path -LiteralPath $mf)) { continue }
@@ -440,10 +440,10 @@ foreach ($mf in @($skillsManifest, $kaliManifest)) {
             'remote-http-mcp' {
                 $hasPin = (-not $capMap['repoUrl']) -and (-not $capMap['repo']) -and $capMap['pinPolicy']
             }
-            'winget-package' { $hasPin = $hasPin } # winget-latest 属于 pinPolicy
-            'apt-package' { $hasPin = $true }      # 发行版仓库自带（Kali 侧）
-            'docker-image' { $hasPin = $true }     # fallback 通道
-            'manual' { $hasPin = $true }           # 手工安装
+            'winget-package' { $hasPin = $hasPin } # winget-latest thuộc pinPolicy.
+            'apt-package' { $hasPin = $true }      # Kho của bản phân phối tự cung cấp (phía Kali).
+            'docker-image' { $hasPin = $true }     # Kênh dự phòng.
+            'manual' { $hasPin = $true }           # Cài đặt thủ công.
             default { $hasPin = $hasPin }
         }
         if (-not $hasPin) {
@@ -454,7 +454,7 @@ foreach ($mf in @($skillsManifest, $kaliManifest)) {
     }
 }
 
-# identity: no FastAPI/React requirement in ops IDENTITY
+# identity: IDENTITY vận hành không yêu cầu FastAPI/React.
 $id = Get-Content (Join-Path $skillsRoot 'ops/IDENTITY.md') -Raw -Encoding UTF8
 if ($id -match '不是|不做|NOT|not a Z3r0|FastAPI|React') { Ok 'identity distinguishes platform' } else { Bad 'identity weak' }
 if ($id -match 'tool-index|bootstrap|field-journal|路由') { Ok 'identity keeps reverse-skill DNA' } else { Bad 'identity missing DNA' }
@@ -465,7 +465,7 @@ $idCheck += "fastapi-in-ops-deps=false"
 $idCheck -join [Environment]::NewLine | Set-Content (Join-Path $ScratchDir 'identity-check.txt') -Encoding UTF8
 Ok 'identity-check written'
 
-# Decision-delta / genuine-decision-boundary contract
+# Quy ước decision-delta / ranh giới quyết định thực sự.
 $transitionContract = Join-Path $PackageRoot "skills/ops/timeline-workitem.md"
 if (Test-Path -LiteralPath $transitionContract) {
     $transitionText = Get-Content -LiteralPath $transitionContract -Raw -Encoding UTF8
@@ -481,7 +481,7 @@ if ($contribText -like "*genuine decision boundary*" -and $contribText -notlike 
 $reWorkflowText = Get-Content -LiteralPath (Join-Path $PackageRoot "skills/reverse-engineering/references/re-agent-workflow.md") -Raw -Encoding UTF8
 if ($reWorkflowText -like "*decision_delta*" -and $reWorkflowText -like "*carry_forward_refs*" -and $reWorkflowText -like "*consumer 必须先继承 refs*") { Ok "representative RE workflow consumes delta by reference" } else { Bad "representative RE workflow missing delta consumer contract" }
 
-# Issue #77 — analysis decision framework anchors (MUST run before fail gate)
+# Issue #77 — điểm neo khung quyết định phân tích (BẮT BUỘC chạy trước cổng thất bại).
 $adf = Join-Path $PackageRoot "skills/ops/analysis-decision-framework.md"
 if (Test-Path -LiteralPath $adf) { Ok "analysis-decision-framework.md present (issue #77)" } else { Bad "analysis-decision-framework.md missing (issue #77)" }
 if (Test-Path -LiteralPath $adf) {
@@ -515,7 +515,7 @@ if (Test-Path -LiteralPath $rules77) {
     if ($rulesText -like "*analysis-decision-framework*") { Ok "RULES.md hooks ADF" } else { Bad "RULES.md missing ADF hook" }
 } else { Bad "RULES.md missing" }
 
-# Issue #77 batch 2 — blindspot cookbook anchors
+# Issue #77 đợt 2 — điểm neo sổ tay blindspot.
 $bsc = Join-Path $PackageRoot "skills/ops/analysis-blindspot-cookbook.md"
 if (Test-Path -LiteralPath $bsc) { Ok "analysis-blindspot-cookbook.md present (issue77 R52-R81)" } else { Bad "analysis-blindspot-cookbook.md missing (issue77 R52-R81)" }
 if (Test-Path -LiteralPath $bsc) {

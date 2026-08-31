@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-Ensure IDA Pro MCP HTTP is healthy; start it only when down.
+Đảm bảo HTTP MCP của IDA Pro hoạt động; chỉ khởi động khi dịch vụ đang tắt.
 
 .DESCRIPTION
-One-shot health check used by the scheduled task. Safe to run every minute:
-a live server is reused, a dead listener is replaced via start.ps1.
+Kiểm tra sức khỏe một lần do tác vụ đã lên lịch gọi. Có thể chạy mỗi phút:
+máy chủ đang hoạt động sẽ được dùng lại, listener đã tắt được thay thế qua start.ps1.
 
-Usage:
+Cách dùng:
   powershell -File watchdog.ps1
 #>
 
@@ -64,8 +64,8 @@ function Probe-IdaMcp {
             return @{ Status = 'stale'; Count = $count }
         }
     } catch {}
-    # Listen + RPC timeout = busy (single-threaded supervisor during idb_open).
-    # Only "nothing listening" or a quick stale (no py_eval) list is down.
+    # Listener còn tồn tại kèm RPC timeout nghĩa là đang bận (supervisor một luồng trong lúc idb_open).
+    # Chỉ coi là tắt khi không có listener hoặc danh sách trả về nhanh nhưng đã cũ (không có py_eval).
     if ($owners.Count -gt 0) {
         return @{ Status = 'busy'; Count = 0 }
     }
