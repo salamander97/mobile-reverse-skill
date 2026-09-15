@@ -11,6 +11,7 @@
     "ghidra-reverse",
     "ida-reverse",
     "radare2",
+    "ipa-reverse",
     "binary-diff",
     "case-review",
     "docs-generator",

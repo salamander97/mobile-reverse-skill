@@ -10,6 +10,7 @@
 | [`ghidra-reverse`](ghidra-reverse/SKILL.md) | Ghidra GUI/headless analysis |
 | [`ida-reverse`](ida-reverse/SKILL.md) | Licensed IDA Pro analysis |
 | [`radare2`](radare2/SKILL.md) | r2/rabin2/radiff2/rizin CLI work |
+| [`ipa-reverse`](ipa-reverse/SKILL.md) | iOS IPA patch workflow: ARM64 analysis, VIP gate, resign, MDL decrypt |
 | [`binary-diff`](binary-diff/SKILL.md) | Cross-version binary comparison |
 | [`case-review`](case-review/SKILL.md) | Evidence graph and fixity review |
 | [`docs-generator`](docs-generator/SKILL.md) | Report and writeup handoff |
